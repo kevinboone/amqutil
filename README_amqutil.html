@@ -1,0 +1,335 @@
+<a href="software.html">&bull; Software</a>
+<a href="utility_corner.html">&bull; Utility corner</a>
+<a href="apache-integration.html">&bull; Apache integration software</a>
+
+<h1>amqutil</h1>
+
+A simple test/benchmark utility for Apache Active MQ.
+
+<h2>What is this?</h2>
+
+<code>amqutil</code> is a simple Java command-line utility for testing
+and exercising ActiveMQ destinations. It can put messages onto queues or
+topics,
+consume from queues, subscribe to topics, list queue contents, 
+and dump individual messages.
+Messages can be read from and written to text files, or just generated
+internally by the utility. <code>amqutil</code> supports transacted
+batches, durable subscriptions, inter-message delays, and persistent
+and non-persistent production.
+
+<h2>Sample command lines</h2>
+
+<pre>
+mqutil --host mybroker --port 6161 --destination testqueue --browse
+  List messages on destination testqueue, on broker mybroker:6161
+  Note that --url can be used instead of --host and --port
+
+amqutil --user fred --password secret --destination testqueue --browse
+  List messages on destination testqueue, on default broker localhost:6161,
+  using specific connection credentials
+
+amqutil --list
+  List the destinations on the default broker
+
+amqutil --destination testqueue --show --number 23
+  Print to the console details of message 23 on destination testqueue,
+  without consuming the message
+
+amqutil --destination testqueue --produce --number 1000 --batch 10
+  Produce 1000 arbitrary 500-character text messages to testqueue
+  in transacted batches of 10 messages
+
+amqutil --destination testqueue --produce --number 1000
+  Produce 1000 arbitrary 500-character text messages to testqueue
+
+amqutil --destination testqueue --produce --length 42
+ Produce a single arbitrary text message of length 42 characters to testqueue
+
+amqutil --destination testqueue --produce --file data.txt
+  Produce text file data.txt to testqueue
+
+amqutil --destination testqueue --consume --format long
+  Consume from the head of testqueue and display all message headers
+
+amqutil --destination testqueue --consume --sleep 1000
+  Consume from the head of testqueue and display the message ID only,
+  pausing for 1000 msec after each message
+
+amqutil --destination testqueue --consume --number 1000 --format none --times
+  Time how long it takes to consume 1000 messages from testqueue
+
+amqutil --destination testtopic --subscribe --format long
+  Subscribe to testtopic and display one message in long format
+  when it is published
+
+amqutil --destination testtopic --publish --file topic.txt
+  Publish the text in topic.txt to testtopic
+
+amqutil --destination testtopic --subscribe --durable my-client
+  Create a durable subscription with client ID my-client
+</pre>
+
+<h2>Building and installing</h2>
+
+<code>amqutil</code> is a Maven project. To build it, use
+
+<pre>
+mvn compile assembly:single
+</pre>
+
+or
+
+<pre>
+mvn package 
+</pre>
+
+This will create a JAR file in the <code>target</code> directory, which
+contains the <code>amqutil</code> code and all the necessary ActiveMQ client
+support. To run the utility, no other dependencies should be necessary;
+just use <code>java -jar</code>:
+
+<pre>
+java -jar target/amqutil.jar {options}
+</pre>
+
+For Linux users, a script <code>install_linux.sh</code> is provided 
+that will copy
+the JAR to <code>/usr/share/amqutil</code> and create an executable script
+<code>/usr/bin/amqutil</code> to run it. Thereafter, you should be able to run
+simply:
+
+<pre>
+$ amqutil {options}
+</pre>
+
+Note that Maven will automatically download all the dependencies needed to
+build <code>amqutil</code> -- about 10Mb of them. This might take some
+time on the first build.
+<p/>
+<code>amqutil</code> is configured to use version 5.9.0 of the ActiveMQ
+client library. This can be changed my modifying the dependency in
+<code>pom.xml</code>.
+
+<h2>Command-line options</h2>
+
+You will generally need to specify one (and only one) of
+<code>--produce</code>, 
+<code>--consume</code>, 
+<code>--publish</code>, 
+<code>--subscribe</code>, 
+<code>--show</code>, 
+<code>--browse</code>, or
+<code>--list</code>, to select the required messaging operation.
+All the other command-line switches modify the behaviour of these
+basic operations.
+<p/>
+<b>--batch {size}</b><br>
+Produce or consume messages in transacted batches of the specified
+size. Use <code>--batch 1</code> to use a transacted session without
+batching.
+<p/>
+<b>--browse</b><br>
+Display a list of messages on the destination whose name is 
+given by the <code>--destination</code> option. To see individual
+message contents, use <code>--show</code>.
+<p/>
+<b>--consume</b><br>
+Consume messages from the queue destination whose name is given by the
+<code>--destination</code> option. By default, one message is consumed; to
+consume more messages, use <code>--number</code>.  The format of the displayed
+messages is controlled using the <code>--format</code> option; to write
+consumed text messages to a text file, using <code>--file</code>. 
+<p/>
+<b>-d, --destination {destination_name}</b><br>
+Specifies the queue or topic name for most other operations. If no name
+is given, the default is "__test_queue".
+<p/>
+<b>--durable {client-ID}</b><br>
+Used in conjunction with <code>--subscribe</code>, makes subscriptions
+durable with the specified client ID.
+<p/>
+<b>--file {filename}</b><br>
+When publishing or producing messages, read the (text) message body from
+the specified file, rather than generating it internally. The whole file
+is read or written, and any <code>--length</code> option is ignored.
+This option reads and writes using the platform's default character
+encoding (usually UTF-8 on Linux systems), even though this may not be
+the encoding format used within the JMS broker itself.
+<p/>
+<b>--format {none|short|long|text}</b><br>
+Format for messages that are consumed with <code>--consume</code> or
+<code>--subscribe</code>. Messages that are displayed using <code>--show</code>
+are always displayed in full detail. <code>none</code> is useful for
+benchmarking, because console output is often slower than messaging operations.
+<code>short</code> displays only the message ID and type; <code>long</code>
+displays all headers; <code>text</code> displays all headers and also the
+message body, if it is text.
+<p/>
+<b>-h, --help</b><br>
+Display a summary of command-line options.
+<p/>
+<b>--host {hostname}</b><br>
+The hostname or IP of the broker; defaults to <code>localhost</code>.
+<p/>
+<b>--longhelp</b><br>
+Display sample command lines.
+<p/>
+<b>--length {number}</b><br>
+When generating messages internally, use the specified number of characters.
+Note that the number of bytes  actually stored will depend on the character
+encoding used by the JVM and/or the JMS broker, and will typically be
+larger (rarely smaller) than the given number of characters.
+<p/>
+<b>--list</b><br>
+List the destinations on the message broker.
+<p/>
+<b>--loglevel {error|warn|info|debug}</b><br>
+Sets the logging level, both of this utility and the ActiveMQ client.
+In practice, although all these levels are defined, the only ones that
+the ActiveMQ client uses are 'error' and 'debug.' The default is
+'error,' which means silent operation in normal circumstances. 
+<p/>
+<b>--manual</b><br>
+Dump the whole manual (this file) to standard output in plain text format,
+formatted for 80 character width.
+<p/>
+<b>--nonpersistent</b><br>
+Enable non-persistent delivery, when used with <code>--produce</code>
+or <code>--publish</code>.
+<p/>
+<b>-n, --number {number}</b><br>
+With operations that produce or consume messages, sets the number of
+messages to produce or consume. With <code>--show</code>, specifies the
+number of the specific message to display. If asked to consume more
+messages than exist on the destination, <code>amqutil</code> will 
+block until new messages are available.
+<p/>
+<b>-p. --password {password}</b><br>
+Specifies the password for authentication against the AMQ broker. 
+Default 'admin'.
+<p/>
+<b>--percent</b><br>
+Prints percentage completion as an operation is performed; this can be useful
+when dealing with huge numbers of messages.
+<p/>
+<b>--port {number}</b><br>
+Broker's TCP/IP port number; default 61616
+<p/>
+<b>--produce</b><br>
+Produce messages to the queue destination whose name is given by the
+<code>--destination</code> option. By default, one message is produced; to
+produce more messages, use <code>--number</code>.  
+To pproduce messages from a text file, use <code>--file</code>; otherwise
+a message of <code>--length</code> characters is generated internally.
+<p/>
+<b>--publish</b><br>
+Publish messages to the topic destination whose name is given by the
+<code>--destination</code> option. By default, one message is published; to
+publish more messages, use <code>--number</code>.  
+To publish messages from a text file, use <code>--file</code>; otherwise
+a message of <code>--length</code> characters is generated internally.
+<p/>
+<b>--show</b><br>
+Displays in detail the message whose number is given by <code>--number</code>,
+on the queue whose name is given by <code>--destination</code>.
+The numbers are arbitrary, and correspond to the numbers assigned when
+using the <code>--browse</code> option. However, message zero is always
+the head of the queue, that is, the message that will be consumed next.
+If the message is a text message, its contents will be displayed. Note
+that it isn't an error to use this option with a topic, but no messages
+will ever be shown.
+<p/>
+<b>--subscribe</b><br>
+Subscribe to the topic destination whose name is given by the
+<code>--destination</code> option. This operation blocks until 
+one or more messages are published to the topic; to wait for more than
+one message, use <code>--number</code>. Messages that are published
+may be displayed, according to the <code>--format</code> option. 
+<p/>
+<b>--time</b><br>
+Show the time in milliseconds taken to complete whatever operation 
+was specified.
+<p/>
+<b>-u, --user {username}</b><br>
+Username for authentication on the broker. Default 'admin'.
+<p/>
+<b>--url {broker_url}</b><br>
+Use a URL for connection to the broker, rather than a simple host/port
+combination. This will be necessary if you want to work with multiple 
+brokers in a failover group. An example might be
+<code>--url failover:\(tcp://broker1:61616,tcp://broker2:61616\)</code>.
+Note that the parentheses have to be escaped here to protect them from
+the shell. If <code>--url</code> is specified, then <code>--host</code> and
+<code>--port</code> are ignored.
+<p/>
+<b>-v, --version</b><br>
+Show program version.
+
+<h2>Notes</h2>
+
+When listing queue contents with <code>--browse</code>, the first entry 
+shown is the head of
+the queue, that is, the message that would next be consumed. 
+<p/>
+Messages in a destination are numbered from zero, not one.
+<p/>
+When producing a message to a destination, if no message file 
+(<code>--file</code>) is
+provided, then a string of 500 arbitrary characters will be produced,
+or of length set by the <code>--length</code> switch.
+</p>
+If a file is specified when consuming messages, then messages will be appended
+to that file, provided they are text messages. Any non-text messages are
+silently ignored
+<p/>
+When listing queue contents with <code>--browse</code>, no guarantee
+can be given that the queue contents will not change before the next
+operation. 
+<p/>
+When producing a message from a text file, the file is read in the 
+platform's default character encoding.
+<p/>
+It is not actually an error to use the <code>--browse</code> option on
+a topic, but not messages will ever be shown -- that is a consequence of
+the way that publish/subscribe messaging works.
+<p/>
+When the <code>--consume</code> option is used, and it blocks because there
+are insufficient messages to consume, then the only way to stop the 
+program is to kill it (e.g., ctrl+C). If the <code>--batch</code> mode
+is used, and the session is therefore transacted, any messages
+consumed will be returned to the destination. This is not a bug although 
+it can be confusing -- transacted sessions are designed to work that way.
+<p/>
+Message delivery is persistent by default. To test non-persistent
+delivery, use the <code>--nonpersistent</code> switch.
+<p/>
+ActiveMQ supports multi-destination production and consumption. To use
+this feature with <code>amqutil</code>, separate the multiple destinations
+with commas. For example: <code>--destination d1,d2,d3</code>.
+
+<h2>Limitations</h2>
+
+Most obviously, there is currently no support for exercising durable
+subscriptions. 
+<p/>
+<code>amqutil</code> is really only useful for
+sending and receiving text messages; JMS does support other formats, but
+their contents are typically only meaningful to specific the applications
+the use them.
+<p/>
+The utility was developed and tested using Sun/Oracle JDK 1.7. Although it
+uses no specific Java 7 language features or APIs, there are
+many dependent libraries and drivers, and these may not work with earlier
+Java versions. 
+ 
+<h2>Author</h2>
+
+<code>amqutil</code> is mainted by Kevin Boone (kevin at railwayterrace dot com). It is distributed under the terms of the GNU Public License, version 2.0,
+in the hope that it will be useful. However, there is no warranty of any kind.
+
+<h2>Download</h2>
+
+<a href="amqutil.tar.gz">Source code bundle (Maven project)</a>
+
+

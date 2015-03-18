@@ -1,0 +1,284 @@
+
+
+
+amqutil
+
+A simple test/benchmark utility for Apache Active MQ.
+
+
+What is this?
+
+amqutil is a simple Java command-line utility for testing and exercising
+ActiveMQ destinations. It can put messages onto queues or topics,
+consume from queues, subscribe to topics, list queue contents, and dump
+individual messages.  Messages can be read from and written to text
+files, or just generated internally by the utility. amqutil supports
+transacted batches, durable subscriptions, inter-message delays, and
+persistent and non-persistent production.
+
+
+Sample command lines
+
+
+  mqutil --host mybroker --port 6161 --destination testqueue --browse
+    List messages on destination testqueue, on broker mybroker:6161 Note
+    that --url can be used instead of --host and --port
+
+  amqutil --user fred --password secret --destination testqueue --browse
+    List messages on destination testqueue, on default broker
+    localhost:6161, using specific connection credentials
+
+  amqutil --list
+    List the destinations on the default broker
+
+  amqutil --destination testqueue --show --number 23
+    Print to the console details of message 23 on destination testqueue,
+    without consuming the message
+
+  amqutil --destination testqueue --produce --number 1000 --batch 10
+    Produce 1000 arbitrary 500-character text messages to testqueue in
+    transacted batches of 10 messages
+
+  amqutil --destination testqueue --produce --number 1000
+    Produce 1000 arbitrary 500-character text messages to testqueue
+
+  amqutil --destination testqueue --produce --length 42
+   Produce a single arbitrary text message of length 42 characters
+   to testqueue
+
+  amqutil --destination testqueue --produce --file data.txt
+    Produce text file data.txt to testqueue
+
+  amqutil --destination testqueue --consume --format long
+    Consume from the head of testqueue and display all message headers
+
+  amqutil --destination testqueue --consume --sleep 1000
+    Consume from the head of testqueue and display the message ID only,
+    pausing for 1000 msec after each message
+
+  amqutil --destination testqueue --consume --number 1000 --format
+  none --times
+    Time how long it takes to consume 1000 messages from testqueue
+
+  amqutil --destination testtopic --subscribe --format long
+    Subscribe to testtopic and display one message in long format when
+    it is published
+
+  amqutil --destination testtopic --publish --file topic.txt
+    Publish the text in topic.txt to testtopic
+
+  amqutil --destination testtopic --subscribe --durable my-client
+    Create a durable subscription with client ID my-client
+
+
+Building and installing
+
+amqutil is a Maven project. To build it, use
+
+
+  mvn compile assembly:single
+
+This will create a JAR file in the target directory, which contains the
+amqutil code and all the necessary ActiveMQ client support. To run the
+utility, no other dependencies should be necessary; just use java -jar:
+
+
+  java -jar target/amqutil.jar {options}
+
+For Linux users, a script install_linux.sh is provided that will copy the
+JAR to /usr/share/amqutil and create an executable script /usr/bin/amqutil
+to run it. Thereafter, you should be able to run simply:
+
+
+  $ amqutil {options}
+
+Note that Maven will automatically download all the dependencies needed
+to build amqutil -- about 10Mb of them. This might take some time on
+the first build.
+
+
+Command-line options
+
+You will generally need to specify one (and only one) of --produce,
+--consume, --publish, --subscribe, --show, --browse, or --list, to select
+the required messaging operation. All the other command-line switches
+modify the behaviour of these basic operations.
+
+--batch {size} Produce or consume messages in transacted batches of
+the specified size. Use -- batch 1 to use a transacted session without
+batching.
+
+--browse Display a list of messages on the destination whose name is
+given by the -- destination option. To see individual message contents,
+use --show.
+
+--consume Consume messages from the queue destination whose name is given
+by the -- destination option. By default, one message is consumed; to
+consume more messages, use --number. The format of the displayed messages
+is controlled using the --format option; to write consumed text messages
+to a text file, using --file.
+
+-d, --destination {destination_name} Specifies the queue or topic name for
+most other operations. If no name is given, the default is "__test_queue".
+
+--durable {client-ID} Used in conjunction with --subscribe, makes
+subscriptions durable with the specified client ID.
+
+--file {filename} When publishing or producing messages, read the
+(text) message body from the specified file, rather than generating it
+internally. The whole file is read or written, and any --length option
+is ignored. This option reads and writes using the platform's default
+character encoding (usually UTF-8 on Linux systems), even though this
+may not be the encoding format used within the JMS broker itself.
+
+--format {none|short|long|text} Format for messages that are consumed
+with --consume or --subscribe. Messages that are displayed using --show
+are always displayed in full detail. none is useful for benchmarking,
+because console output is often slower than messaging operations. short
+displays only the message ID and type; long displays all headers; text
+displays all headers and also the message body, if it is text.
+
+-h, --help Display a summary of command-line options.
+
+--host {hostname} The hostname or IP of the broker; defaults to localhost.
+
+--longhelp Display sample command lines.
+
+--length {number} When generating messages internally, use the specified
+number of characters.  Note that the number of bytes actually stored
+will depend on the character encoding used by the JVM and/or the JMS
+broker, and will typically be larger (rarely smaller) than the given
+number of characters.
+
+--list List the destinations on the message broker.
+
+--loglevel {error|warn|info|debug} Sets the logging level, both of this
+utility and the ActiveMQ client. In practice, although all these levels
+are defined, the only ones that the ActiveMQ client uses are 'error'
+and 'debug.' The default is 'error,' which means silent operation in
+normal circumstances.
+
+--manual Dump the whole manual (this file) to standard output in plain
+text format, formatted for 80 character width.
+
+--nonpersistent Enable non-persistent delivery, when used with --produce
+or --publish.
+
+-n, --number {number} With operations that produce or consume messages,
+sets the number of messages to produce or consume. With --show, specifies
+the number of the specific message to display. If asked to consume more
+messages than exist on the destination, amqutil will block until new
+messages are available.
+
+-p. --password {password} Specifies the password for authentication
+against the AMQ broker. Default 'admin'.
+
+--percent Prints percentage completion as an operation is performed;
+this can be useful when dealing with huge numbers of messages.
+
+--port {number} Broker's TCP/IP port number; default 61616
+
+--produce Produce messages to the queue destination whose name is given
+by the -- destination option. By default, one message is produced;
+to produce more messages, use --number. To pproduce messages from a
+text file, use --file; otherwise a message of --length characters is
+generated internally.
+
+--publish Publish messages to the topic destination whose name is given
+by the -- destination option. By default, one message is published;
+to publish more messages, use --number. To publish messages from a
+text file, use --file; otherwise a message of --length characters is
+generated internally.
+
+--show Displays in detail the message whose number is given by --number,
+on the queue whose name is given by --destination. The numbers are
+arbitrary, and correspond to the numbers assigned when using the --browse
+option. However, message zero is always the head of the queue, that is,
+the message that will be consumed next. If the message is a text message,
+its contents will be displayed. Note that it isn't an error to use this
+option with a topic, but no messages will ever be shown.
+
+--subscribe Subscribe to the topic destination whose name is given
+by the --destination option. This operation blocks until one or more
+messages are published to the topic; to wait for more than one message,
+use --number. Messages that are published may be displayed, according
+to the --format option.
+
+--time Show the time in milliseconds taken to complete whatever operation
+was specified.
+
+-u, --user {username} Username for authentication on the broker. Default
+'admin'.
+
+--url {broker_url} Use a URL for connection to the broker, rather than a
+simple host/port combination. This will be necessary if you want to work
+with multiple brokers in a failover group. An example might be --url
+failover:\(tcp://broker1: 61616,tcp://broker2:61616\). Note that the
+parentheses have to be escaped here to protect them from the shell. If
+--url is specified, then --host and --port are ignored.
+
+-v, --version Show program version.
+
+
+Notes
+
+When listing queue contents with --browse, the first entry shown is the
+head of the queue, that is, the message that would next be consumed.
+
+Messages in a destination are numbered from zero, not one.
+
+When producing a message to a destination, if no message file (--file)
+is provided, then a string of 500 arbitrary characters will be produced,
+or of length set by the --length switch.
+
+If a file is specified when consuming messages, then messages will be
+appended to that file, provided they are text messages. Any non-text
+messages are silently ignored
+
+When listing queue contents with --browse, no guarantee can be given
+that the queue contents will not change before the next operation.
+
+When producing a message from a text file, the file is read in the
+platform's default character encoding.
+
+It is not actually an error to use the --browse option on a topic, but
+not messages will ever be shown -- that is a consequence of the way that
+publish/ subscribe messaging works.
+
+When the --consume option is used, and it blocks because there are
+insufficient messages to consume, then the only way to stop the program
+is to kill it (e.g., ctrl+C). If the --batch mode is used, and the
+session is therefore transacted, any messages consumed will be returned
+to the destination. This is not a bug although it can be confusing --
+transacted sessions are designed to work that way.
+
+Message delivery is persistent by default. To test non-persistent
+delivery, use the --nonpersistent switch.
+
+
+Limitations
+
+Most obviously, there is currently no support for exercising durable
+subscriptions.
+
+amqutil is really only useful for sending and receiving text messages;
+JMS does support other formats, but their contents are typically only
+meaningful to specific the applications the use them.
+
+The utility was developed and tested using Sun/Oracle JDK 1.7. Although
+it uses no specific Java 7 language features or APIs, there are many
+dependent libraries and drivers, and these may not work with earlier
+Java versions.
+
+
+Author
+
+amqutil is mainted by Kevin Boone (kevin at railwayterrace dot com). It is
+distributed under the terms of the GNU Public License, version 2.0, in the
+hope that it will be useful. However, there is no warranty of any kind.
+
+
+Download
+
+Source_code_bundle_(Maven_project)
+
