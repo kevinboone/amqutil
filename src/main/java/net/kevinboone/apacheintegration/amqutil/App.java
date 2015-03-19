@@ -1,7 +1,7 @@
 /*==========================================================================
 amqutil
 App.java
-(c)2013-14 Kevin Boone
+(c)2015 Kevin Boone
 Distributed under the terms of the GPL v2.0
 ==========================================================================*/
 
@@ -36,12 +36,16 @@ import java.io.BufferedReader;
 import java.net.URL; 
 import java.util.Enumeration; 
 import java.util.Set; 
+import java.util.Map; 
+import java.util.Iterator; 
 import org.apache.activemq.advisory.DestinationSource;
 import org.apache.activemq.command.ActiveMQQueue;
 import org.apache.activemq.command.ActiveMQTempQueue;
 import org.apache.activemq.command.ActiveMQTopic;
 import org.apache.activemq.command.ActiveMQTempTopic;
-import org.slf4j.*;
+import org.apache.activemq.ActiveMQMessageConsumer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 
@@ -64,7 +68,7 @@ public class App
 =========================================================================*/
   static void showVersion (PrintStream o)
     {
-    o.println ("amqutil version 0.0.1 Copyright (c)2013-14 Kevin Boone");
+    o.println ("amqutil version 0.0.1 Copyright (c)2015 Kevin Boone");
     }
 
 /*=========================================================================
@@ -99,19 +103,6 @@ public class App
       }
     br.close();
     is.close();
-    }
-
-/*=========================================================================
-  getJMSType 
-=========================================================================*/
-  static String getJMSType (Message m)
-    {
-    if (m instanceof BytesMessage) return "BytesMessage";
-    if (m instanceof MapMessage) return "MapMessage";
-    if (m instanceof ObjectMessage) return "ObjectMessage";
-    if (m instanceof StreamMessage) return "StreamMessage";
-    if (m instanceof TextMessage) return "TextMessage";
-    return "[unknown]";
     }
 
 /*=========================================================================
@@ -156,6 +147,8 @@ public class App
     String destination = "__test_destination";
     String durable = null; 
     String format = "short";
+    String properties = "";
+
     String file = ""; // No default -- if not given, don't read/write file
     int n = 1; // n is the number of messages to process, or a specific
                //   message number, depending on content
@@ -213,6 +206,7 @@ public class App
       "show progress percentage");
     options.addOption ("p", "password", true, "broker password for connection");
     options.addOption (null, "port", true, "set server port");
+    options.addOption (null, "properties", true, "add header properties");
     options.addOption (null, "publish", false, "publish to a topic");
     options.addOption (null, "produce", false, "produce messages");
     options.addOption (null, "show", false, 
@@ -270,6 +264,9 @@ public class App
   
       String _port = cl.getOptionValue ("port");
       if (_port != null) port = Integer.parseInt (_port);
+
+      String _properties = cl.getOptionValue ("properties");
+      if (_properties != null) properties = _properties;
 
       String _sleep = cl.getOptionValue ("sleep");
       if (_sleep != null) sleep = Integer.parseInt (_sleep);
@@ -342,7 +339,7 @@ public class App
     System.setProperty ("log.level", logLevel);
     
     Logger logger = LoggerFactory.getLogger 
-      ("net.kevinboone.apacheintegration");
+      ("amqutil");
 
 
     // For convenience, set a flag if we are batch processing
@@ -390,6 +387,8 @@ public class App
         {
         // Create a simple text message and send it
         TextMessage message = session.createTextMessage (text);
+
+	JMSUtil.setProperties (logger, message, properties);
         producer.send(message);
 
         if (batch)
@@ -452,6 +451,8 @@ public class App
         {
         // Create a simple text message and send it
         TextMessage message = session.createTextMessage (text);
+
+	JMSUtil.setProperties (logger, message, properties);
         producer.send(message);
 
         if (batch)
@@ -511,7 +512,7 @@ public class App
             || format.equals ("text"))
           {
           System.out.printf ("%s %s\n", message.getJMSMessageID(), 
-            getJMSType(message));
+            JMSUtil.getJMSType(message));
           }
         if (format.equals("long") || format.equals ("text"))
           {
@@ -592,7 +593,7 @@ public class App
             || format.equals ("text"))
           {
           System.out.printf ("%s %s\n", message.getJMSMessageID(), 
-            getJMSType(message));
+            JMSUtil.getJMSType(message));
           }
         if (format.equals("long") || format.equals ("text"))
           {
@@ -656,13 +657,13 @@ public class App
         Message m = (Message)e.nextElement();
         if (browse)
           System.out.printf ("% 6d %s %s\n", num, m.getJMSMessageID(), 
-            getJMSType(m));
+            JMSUtil.getJMSType(m));
         if (show)
           {
           if (n == num)
             {
             System.out.printf ("% 6d %s %s\n", num, m.getJMSMessageID(), 
-              getJMSType(m));
+              JMSUtil.getJMSType(m));
             System.out.println (m);
             if (m instanceof TextMessage)
               System.out.println (((TextMessage)m).getText());

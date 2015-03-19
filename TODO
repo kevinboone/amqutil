@@ -1,1 +1,3 @@
-Sleep after each batch
+- Sleep after each batch
+- Support for non-text message types (this requires changes to both production
+  and consumption)

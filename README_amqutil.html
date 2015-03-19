@@ -9,18 +9,24 @@ A simple test/benchmark utility for Apache Active MQ.
 <h2>What is this?</h2>
 
 <code>amqutil</code> is a simple Java command-line utility for testing
-and exercising ActiveMQ destinations. It can put messages onto queues or
+and exercising ActiveMQ destinations. It works with the open-source
+Apache ActiveMQ, and with Red Hat JBoss Fuse and JBoss ActiveMQ.
+It can put messages onto queues or
 topics,
 consume from queues, subscribe to topics, list queue contents, 
-and dump individual messages.
+and dump individual messages in various formats.
 Messages can be read from and written to text files, or just generated
 internally by the utility. <code>amqutil</code> supports transacted
 batches, durable subscriptions, inter-message delays, and persistent
 and non-persistent production.
+<p/>
+<code>amqutil</code> is supplied as a Java JAR file that embeds the ActiveMQ
+client runtime, so installation consists of downloading one JAR file
+and copying it to any convenient directory.
 
 <h2>Sample command lines</h2>
 
-<pre>
+<pre class="codeblock">
 mqutil --host mybroker --port 6161 --destination testqueue --browse
   List messages on destination testqueue, on broker mybroker:6161
   Note that --url can be used instead of --host and --port
@@ -70,11 +76,26 @@ amqutil --destination testtopic --subscribe --durable my-client
   Create a durable subscription with client ID my-client
 </pre>
 
-<h2>Building and installing</h2>
 
-<code>amqutil</code> is a Maven project. To build it, use
+<h2>Installing and running amqutil</h2>
 
-<pre>
+You will need the compiled binary JAR file (see the Downloads section
+below) and a recent Java JVM (Java 7 or later.) To run the utility, 
+install the JAR in any convenient directory, and then:
+
+<pre class="codeblock">
+java -jar /path/to/amqutil.jar {options}
+</pre>
+
+
+<h2>Building</h2>
+
+You will need to build <code>amqutil</code> if, for example, you want to
+change the version of the A-MQ runtime support which it bundles.
+<code>amqutil</code> is a Maven project. To build it, obtain and
+unpack the source code bundle, and then 
+
+<pre class="codeblock">
 mvn compile assembly:single
 </pre>
 
@@ -90,12 +111,13 @@ support. To run the utility, no other dependencies should be necessary;
 just use <code>java -jar</code>:
 
 <pre>
-java -jar target/amqutil.jar {options}
+java -jar target/amqutil-0.0.1-jar-with-dependencies.jar {options}
 </pre>
 
 For Linux users, a script <code>install_linux.sh</code> is provided 
 that will copy
-the JAR to <code>/usr/share/amqutil</code> and create an executable script
+the compiled JAR to <code>/usr/share/amqutil</code> and 
+create an executable script
 <code>/usr/bin/amqutil</code> to run it. Thereafter, you should be able to run
 simply:
 
@@ -110,6 +132,11 @@ time on the first build.
 <code>amqutil</code> is configured to use version 5.9.0 of the ActiveMQ
 client library. This can be changed my modifying the dependency in
 <code>pom.xml</code>.
+
+<p/>
+The latest version of the source can be obtained from
+<a href="https://github.com/kevinboone/amqutil">github</a>.
+
 
 <h2>Command-line options</h2>
 
@@ -216,6 +243,10 @@ when dealing with huge numbers of messages.
 <b>--port {number}</b><br>
 Broker's TCP/IP port number; default 61616
 <p/>
+<b>--properties {name=value[,name=value]...}</b><br>
+Sets arbitrary string properties to the message header before sending.
+Properties are specified as <code>name1=value1,name2=value2...</code>.
+<p/>
 <b>--produce</b><br>
 Produce messages to the queue destination whose name is given by the
 <code>--destination</code> option. By default, one message is produced; to
@@ -239,6 +270,10 @@ the head of the queue, that is, the message that will be consumed next.
 If the message is a text message, its contents will be displayed. Note
 that it isn't an error to use this option with a topic, but no messages
 will ever be shown.
+<p/>
+<b>--sleep {msec}</b><br>
+Sleep (wait) for the specified number of milliseconds after dispatching or
+consuming each message.
 <p/>
 <b>--subscribe</b><br>
 Subscribe to the topic destination whose name is given by the
@@ -272,7 +307,11 @@ When listing queue contents with <code>--browse</code>, the first entry
 shown is the head of
 the queue, that is, the message that would next be consumed. 
 <p/>
-Messages in a destination are numbered from zero, not one.
+The <code>-n</code>/<code>--number</code> switch is used in most modes to
+indicate the number of messages to produce or consume. In <code>--show</code>
+mode, however, it indicates the message to display, with zero (not one)
+being the
+first available.
 <p/>
 When producing a message to a destination, if no message file 
 (<code>--file</code>) is
@@ -291,7 +330,7 @@ When producing a message from a text file, the file is read in the
 platform's default character encoding.
 <p/>
 It is not actually an error to use the <code>--browse</code> option on
-a topic, but not messages will ever be shown -- that is a consequence of
+a topic, but no messages will ever be shown -- that is a consequence of
 the way that publish/subscribe messaging works.
 <p/>
 When the <code>--consume</code> option is used, and it blocks because there
@@ -307,6 +346,27 @@ delivery, use the <code>--nonpersistent</code> switch.
 ActiveMQ supports multi-destination production and consumption. To use
 this feature with <code>amqutil</code>, separate the multiple destinations
 with commas. For example: <code>--destination d1,d2,d3</code>.
+<p/>
+<code>amqutil</code> can monitor broker operation via
+<a href="http://activemq.apache.org/advisory-message.html">advisory topics</a>. 
+For example, to monitor connections being opened and closed in real time:
+
+<pre class="codeblock">
+amqutil --subscribe --destination ActiveMQ.Advisory.Connection
+</pre>
+
+However, most advisory topics are not enabled by default, and some administrators
+are wary of enabling them, because of the additional network and memory load
+they might create.
+<p/>
+The <code>--properties</code> switch can be used to exercise some specific
+ActiveMQ behavior. For example, setting the <code>JMSXGroupID</code> header
+should ensure that a single consumer gets all the messages, regardless 
+of the number of consumers attached. 
+
+<pre class="codeblock">
+amqutil --properties JMSXGroupID=something --produce ...
+</pre>
 
 <h2>Limitations</h2>
 
@@ -330,6 +390,7 @@ in the hope that it will be useful. However, there is no warranty of any kind.
 
 <h2>Download</h2>
 
-<a href="amqutil.tar.gz">Source code bundle (Maven project)</a>
+<a href="amqutil.tar.gz">Source code bundle (Maven project)</a><br/>
+<a href="amqutil-0.0.1.jar">Precompiled JAR (including A-MQ runtime components)</a>
 
 
