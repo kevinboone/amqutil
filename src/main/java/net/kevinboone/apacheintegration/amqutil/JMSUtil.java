@@ -6,14 +6,10 @@ Distributed under the terms of the GPL v2.0
 ==========================================================================*/
 
 package net.kevinboone.apacheintegration.amqutil;
-import javax.jms.TextMessage;
-import javax.jms.BytesMessage;
-import javax.jms.MapMessage;
-import javax.jms.ObjectMessage;
-import javax.jms.StreamMessage;
-import javax.jms.Message;
-import javax.jms.JMSException;
+import javax.jms.*;
+import java.io.*;
 import org.slf4j.Logger;
+import org.apache.commons.io.FileUtils;
 
 public class JMSUtil
 {
@@ -37,6 +33,8 @@ public class JMSUtil
   public static void setProperties (Logger logger, Message m, String props)
       throws JMSException
     {
+    if (props == null) return;
+    if (props.length() == 0) return;
     String[] propArray = props.split (",");
     for (String prop : propArray)
       {
@@ -54,6 +52,35 @@ public class JMSUtil
       }
     }
 
+public static void outputMessage (String format, Message message, String file)
+    throws JMSException, IOException
+  {
+  if (format.equals ("short") || format.equals("long") 
+            || format.equals ("text"))
+          {
+          System.out.printf ("%s %s\n", message.getJMSMessageID(), 
+            JMSUtil.getJMSType(message));
+          }
+  if (format.equals("long") || format.equals ("text"))
+          {
+          System.out.println (message);
+          }
+  if (format.equals ("text"))
+          {
+          if (message instanceof TextMessage)
+            System.out.println (((TextMessage)message).getText());
+          else
+            System.out.println ("[Not a text message]");
+          }
+  if (!file.equals(""))
+          {
+          if (message instanceof TextMessage)
+            {
+            FileUtils.writeStringToFile (new File(file), 
+             ((TextMessage)message).getText(), true);
+            }
+          }
+  }
 }
 
 
