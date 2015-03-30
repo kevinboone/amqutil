@@ -46,6 +46,7 @@ public class CmdProduce extends Cmd
                //   message number, depending on content
     int length = 500; // Length of message generated internally
     String url = "";  // No default -- if not given, don't use it
+    String type = "text";
     int sleep = 0;
     int batchSize = 0; 
 
@@ -54,6 +55,9 @@ public class CmdProduce extends Cmd
   
     String _host = cl.getOptionValue ("host");
     if (_host != null) host = _host;
+  
+    String _type = cl.getOptionValue ("msgtype");
+    if (_type != null) type = _type;
   
     String _port = cl.getOptionValue ("port");
     if (_port != null) port = Integer.parseInt (_port);
@@ -112,24 +116,12 @@ public class CmdProduce extends Cmd
     if (nonPersistent)
         producer.setDeliveryMode (DeliveryMode.NON_PERSISTENT);
 
-    String text = "";
-    if (file.equals(""))
-      {
-      // Make a text string
-      for (int j = 0; j < length; j++)
-          text += (char)('0' + (j % 10)); 
-      }
-    else
-      {
-      text = readFile (file); 
-      }
+    javax.jms.Message message = JMSUtil.makeMessage 
+      (session, file, length, type);
 
     int oldpercent = 0;
     for (int i = 0; i < n; i++)
       {
-      // Create a simple text message and send it
-      TextMessage message = session.createTextMessage (text);
-
       JMSUtil.setProperties (logger, message, properties);
       producer.send(message);
 
@@ -160,6 +152,8 @@ public class CmdProduce extends Cmd
     {
     super.setupOptions();
     options.addOption ("b", "batch", true, "set batch size");
+    options.addOption ("m", "msgtype", true, 
+      "text|bytes");
     options.addOption ("d", "destination", true, 
       "destination (queue or topic) name");
     options.addOption ("i", "file", true, 

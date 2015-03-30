@@ -12,7 +12,7 @@ A simple test/benchmark utility for Apache Active MQ.
 
 <code>amqutil</code> is a simple Java command-line utility for testing
 and exercising ActiveMQ destinations. It works with the open-source
-Apache ActiveMQ, and with Red Hat JBoss Fuse and JBoss ActiveMQ.
+Apache ActiveMQ, and with Red Hat JBoss Fuse and JBoss A-MQ.
 It can put messages onto queues or
 topics,
 consume from queues, set message header properties, 
@@ -22,6 +22,13 @@ Messages can be read from and written to text files, or just generated
 internally by the utility. <code>amqutil</code> supports transacted
 batches, durable subscriptions, inter-message delays, and persistent
 and non-persistent production.
+<p/>
+<code>amqutil</code> is intended to extend the test client functionality
+provided by the <code>mq-client.jar</code> utility that is
+supplied with JBoss A-MQ. Its command-line is similar (but not identical),
+but <code>amqutil</code> provides a number of features that
+<code>mq-client.jar</code> does not, particularly around queue and
+broker browsing, and message formatting.
 <p/>
 <code>amqutil</code> is supplied as a Java JAR file that embeds the ActiveMQ
 client runtime, so installation consists of downloading one JAR file

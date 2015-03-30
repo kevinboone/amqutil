@@ -143,7 +143,7 @@ public abstract class Cmd
   /** 
   Read a file into a string
   */
-  String readFile (String path) throws IOException
+  static String readFile (String path) throws IOException
     {
     return FileUtils.readFileToString (new File (path));
     }

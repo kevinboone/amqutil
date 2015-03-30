@@ -69,6 +69,20 @@ public static void outputMessage (String format, Message message, String file)
           {
           if (message instanceof TextMessage)
             System.out.println (((TextMessage)message).getText());
+          else if (message instanceof BytesMessage)
+            {
+            BytesMessage bm = (BytesMessage)message;
+            long l = bm.getBodyLength();
+            byte[] bb = new byte [(int)l]; 
+            bm.readBytes (bb, (int)l);
+            for (int i = 0; i < l; i++)
+              {
+              byte b = bb[i];
+              System.out.printf ("%02X ", b);
+              if (((i + 1) % 16) == 0) System.out.println ("");
+              }
+            System.out.println ("");
+            }
           else
             System.out.println ("[Not a text message]");
           }
@@ -79,7 +93,65 @@ public static void outputMessage (String format, Message message, String file)
             FileUtils.writeStringToFile (new File(file), 
              ((TextMessage)message).getText(), true);
             }
+          else if (message instanceof BytesMessage)
+            {
+            BytesMessage bm = (BytesMessage)message;
+            long l = bm.getBodyLength();
+            byte[] bb = new byte [(int)l]; 
+            bm.readBytes (bb, (int)l);
+            FileOutputStream fos = new FileOutputStream (new File(file));
+            fos.write (bb);
+            fos.close();
+            }
           }
+  }
+
+/** Make a JMS message of the specified type, from the specified file if
+  * there is one.
+ */
+public static Message makeMessage (Session session, String file, int length,
+      String type)
+    throws JMSException, IOException, BadTypeException
+  {
+  if ("text".equals (type))
+    {
+    String text = "";
+    if (file.equals(""))
+      {
+      // Make a text string
+      for (int j = 0; j < length; j++)
+          text += (char)('0' + (j % 10)); 
+      }
+    else
+      {
+      text = Cmd.readFile (file); 
+      }
+    return session.createTextMessage(text);
+    }
+  else if ("bytes".equals (type))
+    {
+    BytesMessage bm = session.createBytesMessage();
+    if (file.equals(""))
+      {
+      // Make a bytes string
+      byte[] bb = new byte[length];
+      for (int j = 0; j < length; j++)
+          bb [j] = (byte) (j % 256); 
+      bm.writeBytes (bb, 0, length);
+      }
+    else
+      {
+      FileInputStream fis = new FileInputStream (new File (file));
+      int l = fis.available();
+      byte[] bb = new byte[l];
+      fis.read(bb, 0, l);
+      bm.writeBytes (bb);
+      fis.close();
+      }
+    return bm; 
+    }
+  else
+    throw new BadTypeException (type);
   }
 }
 

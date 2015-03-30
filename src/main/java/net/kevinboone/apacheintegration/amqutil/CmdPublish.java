@@ -46,6 +46,7 @@ public class CmdPublish extends Cmd
     int length = 500; // Length of message generated internally
     boolean nonPersistent = false;
     String properties = "";
+    String type = "text";
 
     int n = 1; // n is the number of messages to process, or a specific
                //   message number, depending on content
@@ -60,6 +61,9 @@ public class CmdPublish extends Cmd
   
     String _host = cl.getOptionValue ("host");
     if (_host != null) host = _host;
+  
+    String _type = cl.getOptionValue ("msgtype");
+    if (_type != null) type = _type;
   
     String _port = cl.getOptionValue ("port");
     if (_port != null) port = Integer.parseInt (_port);
@@ -111,24 +115,12 @@ public class CmdPublish extends Cmd
     if (nonPersistent)
         producer.setDeliveryMode (DeliveryMode.NON_PERSISTENT);
 
-    String text = "";
-    if (file.equals(""))
-        {
-        // Make a text string
-        for (int j = 0; j < length; j++)
-          text += (char)('0' + (j % 10)); 
-        }
-    else
-        {
-        text = readFile (file); 
-        }
+    javax.jms.Message message = JMSUtil.makeMessage (session, file, 
+      length, type);
 
     int oldpercent = 0;
     for (int i = 0; i < n; i++)
         {
-        // Create a simple text message and send it
-        TextMessage message = session.createTextMessage (text);
-
 	JMSUtil.setProperties (logger, message, properties);
         producer.send(message);
 
@@ -162,6 +154,8 @@ public class CmdPublish extends Cmd
       "input message from text file");
     options.addOption ("d", "destination", true, 
       "destination (queue or topic) name");
+    options.addOption ("m", "msgtype", true, 
+      "text|bytes");
     options.addOption (null, "host", true, "set server hostname");
     options.addOption ("p", "password", true, "broker password for connection");
     options.addOption (null, "port", true, "set server port");

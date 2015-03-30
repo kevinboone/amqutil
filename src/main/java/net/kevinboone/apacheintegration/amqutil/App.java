@@ -6,6 +6,7 @@ Distributed under the terms of the GPL v2.0
 ==========================================================================*/
 
 package net.kevinboone.apacheintegration.amqutil;
+import org.slf4j.*;
 
 /**
  * Main class for the amqutil application.
@@ -49,6 +50,13 @@ public class App
           ("amqutil");
         logger.error ("Error parsing arguments for \"" + args[0] 
           + "\" command: " + e.getMessage());
+        }
+      catch (BadTypeException e)
+        {
+        Logger logger = LoggerFactory.getLogger 
+          ("amqutil");
+        logger.error ("Unknown message type \"" + e.getMessage() 
+          + "\"");
         }
       }
     else
