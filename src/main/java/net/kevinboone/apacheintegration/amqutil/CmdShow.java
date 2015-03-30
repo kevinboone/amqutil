@@ -34,13 +34,13 @@ public class CmdShow extends Cmd
   public int run() throws Exception
     {
     // Default values of command line arguments
-    String host = "localhost";
-    int port = 61616;
-    String user = "admin";
-    String pass = "admin";
-    String destination = "__test_destination";
-    String format = "short";
+    String host = DEFAULT_HOST; 
+    int port = DEFAULT_PORT;
+    String user = DEFAULT_USER;
+    String pass = DEFAULT_PASS;
+    String destination = DEFAULT_DESTINATION; 
     String file = ""; // No default -- if not given, don't read/write file
+    String format = "short";
 
     int n = 0; // n is the number of messages to process, or a specific
                //   message number, depending on content

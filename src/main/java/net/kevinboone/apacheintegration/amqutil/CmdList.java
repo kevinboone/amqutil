@@ -36,11 +36,11 @@ public class CmdList extends Cmd
   public int run() throws Exception
     {
     // Default values of command line arguments
-    String host = "localhost";
-    int port = 61616;
-    String user = "admin";
-    String pass = "admin";
-    String destination = "__test_destination";
+    String host = DEFAULT_HOST; 
+    int port = DEFAULT_PORT;
+    String user = DEFAULT_USER;
+    String pass = DEFAULT_PASS;
+    String destination = DEFAULT_DESTINATION; 
 
     String url = "";  // No default -- if not given, don't use it
 

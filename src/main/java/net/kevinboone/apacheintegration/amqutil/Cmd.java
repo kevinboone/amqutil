@@ -21,6 +21,12 @@ public abstract class Cmd
   protected CommandLine cl = null; 
   protected Logger logger = null;
 
+  public static String DEFAULT_HOST = "localhost";
+  public static int DEFAULT_PORT = 61616;
+  public static String DEFAULT_USER= "admin";
+  public static String DEFAULT_PASS= "admin";
+  public static String DEFAULT_DESTINATION = "__test_destination";
+
   public Cmd ()
     {
     options = new Options();
