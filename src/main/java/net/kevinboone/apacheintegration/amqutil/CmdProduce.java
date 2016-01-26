@@ -49,6 +49,7 @@ public class CmdProduce extends Cmd
     String type = "text";
     int sleep = 0;
     int batchSize = 0; 
+    int priority = -1; // Use default priority
 
     String _destination = cl.getOptionValue ("destination");
     if (_destination != null) destination = _destination;
@@ -61,6 +62,9 @@ public class CmdProduce extends Cmd
   
     String _port = cl.getOptionValue ("port");
     if (_port != null) port = Integer.parseInt (_port);
+
+    String _priority = cl.getOptionValue ("priority");
+    if (_priority != null) priority = Integer.parseInt (_priority);
 
     String _properties = cl.getOptionValue ("properties");
     if (_properties != null) properties = _properties;
@@ -112,6 +116,8 @@ public class CmdProduce extends Cmd
     Queue queue = session.createQueue(destination);
 
     MessageProducer producer = session.createProducer(queue);
+    if (priority >= 0)
+      producer.setPriority (priority);
 
     if (nonPersistent)
         producer.setDeliveryMode (DeliveryMode.NON_PERSISTENT);
@@ -119,10 +125,13 @@ public class CmdProduce extends Cmd
     javax.jms.Message message = JMSUtil.makeMessage 
       (session, file, length, type);
 
+
     int oldpercent = 0;
     for (int i = 0; i < n; i++)
       {
       JMSUtil.setProperties (logger, message, properties);
+      if (priority >= 0) 
+        message.setJMSPriority (priority);
       producer.send(message);
 
       if (batch)
@@ -167,6 +176,7 @@ public class CmdProduce extends Cmd
       "show progress percentage");
     options.addOption ("p", "password", true, "broker password for connection");
     options.addOption (null, "port", true, "set server port");
+    options.addOption (null, "priority", true, "set message priority (0-9)");
     options.addOption (null, "properties", true, "add header properties");
     options.addOption (null, "sleep", true, 
       "sleep for the specified number of milliseconds between each message");
