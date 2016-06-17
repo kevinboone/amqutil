@@ -39,6 +39,7 @@ public class CmdConsume extends Cmd
     String pass = DEFAULT_PASS;
     String destination = DEFAULT_DESTINATION; 
     String properties = "";
+    String selector = null;
     boolean showpercent = false;
     String format = "short";
 
@@ -54,6 +55,9 @@ public class CmdConsume extends Cmd
     if (nonSwitchArgs.length > 0)
       n = Integer.parseInt (nonSwitchArgs[0]);
 
+    String _selector = cl.getOptionValue ("selector");
+    if (_selector != null) selector = _selector;
+  
     String _destination = cl.getOptionValue ("destination");
     if (_destination != null) destination = _destination;
   
@@ -101,7 +105,14 @@ public class CmdConsume extends Cmd
 
     Queue queue = session.createQueue(destination);
 
-    MessageConsumer consumer = session.createConsumer(queue);
+    MessageConsumer consumer = null;
+    if (selector == null)
+      consumer = session.createConsumer(queue);
+    else
+      {
+      consumer = session.createConsumer(queue, selector);
+      //System.out.println ("Selector is " + selector);
+      }
 
     int oldpercent = 0;
     for (int i = 0; i < n; i++)
@@ -148,6 +159,8 @@ public class CmdConsume extends Cmd
       "show progress percentage");
     options.addOption ("p", "password", true, "broker password for connection");
     options.addOption (null, "port", true, "set server port");
+    options.addOption (null, "selector", true, 
+      "message selector expression");
     options.addOption (null, "sleep", true, 
       "sleep for the specified number of milliseconds between each message");
     options.addOption ("u", "user", true, "broker username for connection");

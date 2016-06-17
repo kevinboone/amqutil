@@ -348,6 +348,9 @@ message body, if it is text.
 <b>--host {hostname}</b><br>
 The hostname or IP of the broker; defaults to <code>localhost</code>.
 <p/>
+<b>--jmstype {string}</b><br>
+Set the value of the JMSType header.
+<p/>
 <b>--length {number}</b><br>
 When generating messages internally, use the specified number of characters.
 Note that the number of bytes  actually stored will depend on the character
@@ -384,6 +387,9 @@ Properties are specified as <code>name1=value1,name2=value2...</code>.
 <b>--sleep {msec}</b><br>
 Sleep (wait) for the specified number of milliseconds after dispatching or
 consuming each message.
+<p/>
+<b>--selector {expression}</b><br>
+When consuming messages from a queue, apply the specified selector expression
 <p/>
 <b>--time</b><br>
 Show the time in milliseconds taken to complete whatever operation 

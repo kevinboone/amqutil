@@ -38,6 +38,7 @@ public class CmdProduce extends Cmd
     String pass = DEFAULT_PASS;
     String destination = DEFAULT_DESTINATION; 
     String properties = "";
+    String jmsType = null;
     boolean nonPersistent = false;
     boolean showpercent = false;
 
@@ -56,6 +57,9 @@ public class CmdProduce extends Cmd
   
     String _host = cl.getOptionValue ("host");
     if (_host != null) host = _host;
+  
+    String _jmsType = cl.getOptionValue ("jmstype");
+    if (_jmsType != null) jmsType = _jmsType;
   
     String _type = cl.getOptionValue ("msgtype");
     if (_type != null) type = _type;
@@ -132,6 +136,10 @@ public class CmdProduce extends Cmd
       JMSUtil.setProperties (logger, message, properties);
       if (priority >= 0) 
         message.setJMSPriority (priority);
+      if (jmsType != null)
+        {
+        message.setJMSType (jmsType);
+        }
       producer.send(message);
 
       if (batch)
@@ -172,6 +180,7 @@ public class CmdProduce extends Cmd
     options.addOption (null, "nonpersistent", false,  
       "enable non-persistent delivery");
     options.addOption (null, "host", true, "set server hostname");
+    options.addOption (null, "jmstype", true, "set JMSType header");
     options.addOption (null, "percent", false, 
       "show progress percentage");
     options.addOption ("p", "password", true, "broker password for connection");
