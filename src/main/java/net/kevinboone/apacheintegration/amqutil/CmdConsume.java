@@ -49,6 +49,7 @@ public class CmdConsume extends Cmd
     int length = 500; // Length of message generated internally
     String url = "";  // No default -- if not given, don't use it
     int sleep = 0;
+    int linger = 0;
     int batchSize = 0; 
 
     String[] nonSwitchArgs = cl.getArgs();
@@ -69,6 +70,9 @@ public class CmdConsume extends Cmd
 
     String _sleep = cl.getOptionValue ("sleep");
     if (_sleep != null) sleep = Integer.parseInt (_sleep);
+
+    String _linger = cl.getOptionValue ("linger");
+    if (_linger != null) linger = Integer.parseInt (_linger);
 
     String _batchSize = cl.getOptionValue ("batch");
     if (_batchSize != null) batchSize  = Integer.parseInt (_batchSize);
@@ -119,6 +123,9 @@ public class CmdConsume extends Cmd
         {
         javax.jms.Message message = consumer.receive();
 
+        if (linger != 0)
+          Thread.sleep (linger);
+
         if (batch)
           if ((i + 1) % batchSize == 0) session.commit();
 
@@ -157,6 +164,7 @@ public class CmdConsume extends Cmd
     options.addOption (null, "host", true, "set server hostname");
     options.addOption (null, "percent", false, 
       "show progress percentage");
+    options.addOption (null, "linger", true, "delay (ms) between consume and commit in batch mode");
     options.addOption ("p", "password", true, "broker password for connection");
     options.addOption (null, "port", true, "set server port");
     options.addOption (null, "selector", true, 

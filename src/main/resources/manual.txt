@@ -335,6 +335,11 @@ are defined, the only ones that the ActiveMQ client uses are 'error'
 and 'debug.' The default is 'error,' which means silent operation in
 normal circumstances.
 
+--linger {msec} In batch mode (see --batch), delay for the specified
+time between receiving the batch, and acknowledging it. The batch size
+can be usefully be 1. This switch simulates an 'abnormal' condition,
+where the consumer takes a substantial time to acknowledge a message.
+
 --nonpersistent Enable non-persistent delivery, when used with produce
 or publish.
 
@@ -351,13 +356,16 @@ to the message header before sending.  Properties are specified as
 name1=value1,name2=value2....
 
 --sleep {msec} Sleep (wait) for the specified number of milliseconds
-after dispatching or consuming each message.
+after dispatching or consuming each message. See also --linger.
 
 --selector {expression} When consuming messages from a queue, apply the
 specified selector expression
 
 --time Show the time in milliseconds taken to complete whatever operation
 was specified.
+
+--ttl {msec} When producing a message to a queue, set the expiration
+time to the specified time.
 
 -u, --user {username} Username for authentication on the broker. Default
 'admin'.

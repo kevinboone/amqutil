@@ -34,6 +34,7 @@ public class CmdProduce extends Cmd
     // Default values of command line arguments
     String host = DEFAULT_HOST; 
     int port = DEFAULT_PORT;
+    int ttl = 0;
     String user = DEFAULT_USER;
     String pass = DEFAULT_PASS;
     String destination = DEFAULT_DESTINATION; 
@@ -75,6 +76,9 @@ public class CmdProduce extends Cmd
 
     String _sleep = cl.getOptionValue ("sleep");
     if (_sleep != null) sleep = Integer.parseInt (_sleep);
+
+    String _ttl = cl.getOptionValue ("ttl");
+    if (_ttl != null) ttl = Integer.parseInt (_ttl);
 
     String _batchSize = cl.getOptionValue ("batch");
     if (_batchSize != null) batchSize  = Integer.parseInt (_batchSize);
@@ -122,6 +126,9 @@ public class CmdProduce extends Cmd
     MessageProducer producer = session.createProducer(queue);
     if (priority >= 0)
       producer.setPriority (priority);
+
+    if (ttl != 0)
+      producer.setTimeToLive (ttl);
 
     if (nonPersistent)
         producer.setDeliveryMode (DeliveryMode.NON_PERSISTENT);
@@ -184,6 +191,7 @@ public class CmdProduce extends Cmd
     options.addOption (null, "percent", false, 
       "show progress percentage");
     options.addOption ("p", "password", true, "broker password for connection");
+    options.addOption ("t", "ttl", true, "message time to live (ms)");
     options.addOption (null, "port", true, "set server port");
     options.addOption (null, "priority", true, "set message priority (0-9)");
     options.addOption (null, "properties", true, "add header properties");
