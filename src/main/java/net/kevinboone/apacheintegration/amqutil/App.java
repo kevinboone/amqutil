@@ -17,7 +17,6 @@ public class App
  * Start here!
  */
   public static void main( String[] args )
-      throws Exception
     {
     // If invoked with no arguments, dump a usage message and exit
     if (args.length < 1)
@@ -57,6 +56,13 @@ public class App
           ("amqutil");
         logger.error ("Unknown message type \"" + e.getMessage() 
           + "\"");
+        }
+      catch (Exception e)
+        {
+        Logger logger = LoggerFactory.getLogger 
+          ("amqutil");
+        logger.error (e.getMessage());
+        System.exit (-1);
         }
       }
     else

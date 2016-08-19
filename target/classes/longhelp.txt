@@ -1,0 +1,50 @@
+amqutil --host mybroker --port 6161 --destination testqueue --browse
+  List messages on destination testqueue, on broker mybroker:6161
+  Note that --url can be used instead of --host and --port
+
+amqutil --user fred --password secret --destination testqueue --browse
+  List messages on destination testqueue, on default broker localhost:6161,
+  using specific connection credentials
+
+amqutil --list
+  List the destinations on the default broker
+
+amqutil --destination testqueue --show --number 23
+  Print to the console details of message 23 on destination testqueue,
+  without consuming the message
+
+amqutil --destination testqueue --produce --number 1000 --batch 10
+  Produce 1000 arbitrary 500-character text messages to testqueue
+  in transacted batches of 10 messages
+
+amqutil --destination testqueue --produce --number 1000
+  Produce 1000 arbitrary 500-character text messages to testqueue
+
+amqutil --destination testqueue --produce --length 42
+  Produce a single arbitrary text message of length 42 characters to testqueue
+
+amqutil --destination testqueue --produce --file data.txt 
+  Produce text file data.txt to testqueue
+
+amqutil --destination testqueue --consume --format long
+  Consume from the head of testqueue and display all message headers
+
+amqutil --destination testqueue --consume --sleep 1000 
+  Consume from the head of testqueue and display the message ID only,
+  pausing for 1000 msec after each message 
+
+amqutil --destination testqueue --consume --number 1000 --format none --times 
+  Time how long it takes to consume 1000 messages from testqueue
+
+amqutil --destination testtopic --subscribe --format long
+  Subscribe to testtopic and display one message in long format
+  when it is published
+
+amqutil --destination testtopic --publish --file topic.txt
+  Publish the text in topic.txt to testtopic
+
+amqutil --destination testtopic --subscribe --durable my-client 
+  Create a durable subscription with client ID my-client
+
+ 
+
