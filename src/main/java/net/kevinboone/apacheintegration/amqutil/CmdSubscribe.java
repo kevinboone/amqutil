@@ -49,6 +49,7 @@ public class CmdSubscribe extends Cmd
     String properties = "";
     String format = "short";
     String durable = null; 
+    String selector = null;
 
     int n = 1; // n is the number of messages to process, or a specific
                //   message number, depending on content
@@ -103,6 +104,9 @@ public class CmdSubscribe extends Cmd
     String _format = cl.getOptionValue ("format");
     if (_format != null) format = _format; 
 
+    String _selector = cl.getOptionValue ("selector");
+    if (_selector != null) selector = _selector;
+  
     ActiveMQConnectionFactory factory = getFactory (host, port, url); 
 
     Connection connection = factory.createConnection(user, pass);
@@ -119,9 +123,20 @@ public class CmdSubscribe extends Cmd
 
     MessageConsumer consumer = null; 
     if (durable != null)
-        consumer = session.createDurableSubscriber (topic, "amqutil");
+        {
+        if (selector == null)
+          consumer = session.createDurableSubscriber (topic, "amqutil");
+        else
+          consumer = session.createDurableSubscriber 
+            (topic, "amqutil", selector, false);
+        }
     else
-        consumer = session.createConsumer(topic);
+        {
+        if (selector == null)
+          consumer = session.createConsumer(topic);
+        else
+          consumer = session.createConsumer(topic, selector);
+        }
 
     int oldpercent = 0;
     for (int i = 0; i < n; i++)
@@ -175,6 +190,8 @@ public class CmdSubscribe extends Cmd
       "enable durable subscription with specified client ID");
     options.addOption (null, "format", true, 
       "display format: none|short|long|text");
+    options.addOption (null, "selector", true, 
+      "message selector expression");
     }
 
 }
