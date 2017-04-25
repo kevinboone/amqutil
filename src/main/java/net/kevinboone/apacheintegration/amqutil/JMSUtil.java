@@ -119,8 +119,10 @@ public static Message makeMessage (Session session, String file, int length,
     if (file.equals(""))
       {
       // Make a text string
+      StringBuffer sb = new StringBuffer (length);
       for (int j = 0; j < length; j++)
-          text += (char)('0' + (j % 10)); 
+          sb.append ((char)('0' + (j % 10))); 
+      text = new String (sb);
       }
     else
       {
