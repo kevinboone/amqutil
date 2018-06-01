@@ -107,7 +107,7 @@ public class CmdSubscribe extends Cmd
     String _selector = cl.getOptionValue ("selector");
     if (_selector != null) selector = _selector;
   
-    ActiveMQConnectionFactory factory = getFactory (host, port, url); 
+    ConnectionFactory factory = getFactory (host, port, url); 
 
     Connection connection = factory.createConnection(user, pass);
 

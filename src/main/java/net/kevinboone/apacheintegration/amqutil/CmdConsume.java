@@ -99,7 +99,7 @@ public class CmdConsume extends Cmd
     boolean batch = false;
     if (batchSize != 0) batch = true; 
 
-    ActiveMQConnectionFactory factory = getFactory (host, port, url); 
+    ConnectionFactory factory = getFactory (host, port, url); 
 
     Connection connection = factory.createConnection(user, pass);
     connection.start();

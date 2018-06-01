@@ -74,7 +74,7 @@ public class CmdShow extends Cmd
     String _url = cl.getOptionValue ("url");
     if (_url != null) url = _url; 
 
-    ActiveMQConnectionFactory factory = getFactory (host, port, url); 
+    ConnectionFactory factory = getFactory (host, port, url); 
 
     Connection connection = factory.createConnection(user, pass);
     connection.start();

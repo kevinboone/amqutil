@@ -3,7 +3,7 @@
 
 amqutil
 
-Version 0.1.0
+Version 0.1.1
 
 A simple test/benchmark utility for Apache Active MQ.
 
@@ -25,6 +25,10 @@ by the mq- client.jar utility that is supplied with JBoss A-MQ. Its
 command-line is similar (but not identical), but amqutil provides a
 number of features that mq- client.jar does not, particularly around
 queue and broker browsing, and message formatting.
+
+As of version 0.1.1, amqutil can use the AMQP protocol via Apache
+QPID, rather than ActiveMQ OpenWire. This feature is enabled for
+all commands using the --qpid switch.
 
 amqutil is supplied as a Java JAR file that embeds the ActiveMQ client
 runtime, so installation consists of downloading one JAR file and copying
@@ -455,20 +459,20 @@ At present, amqutil is Enlish-language only.
 
 Revision history
 
+0.1.1           June 2018 Initial Qpid AMQP support
 
-0.1.0, March 2015 Re-written so that command-line arguments are
-specified
-                    differently for each sub-command, reducing the chance
-                    of the user providing arguments that have no effect.
+0.1.0           March 2015 Re-written so that command-line arguments are
+                specified differently for each sub-command, reducing the 
+                chance of the user providing arguments that have no effect.
 
-0.0.1               First functional release
+0.0.1           First functional release
 
 
 
 Author
 
 amqutil is mainted by Kevin Boone (kevin at railwayterrace dot com). It is
-distributed under the terms of the GNU Public License, version 2.0, in the
+distributed under the terms of the GNU Public License, version 3.0, in the
 hope that it will be useful. However, there is no warranty of any kind.
 
 

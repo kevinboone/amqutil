@@ -10,6 +10,7 @@ import org.slf4j.*;
 import java.io.*;
 import org.apache.commons.cli.*;
 import org.apache.activemq.*;
+import javax.jms.*;
 import org.apache.commons.io.FileUtils;
 
 /**
@@ -43,6 +44,8 @@ public abstract class Cmd
       "show brief help");
    options.addOption (null, "loglevel", true, 
       "set log level -- error, info, etc");
+   options.addOption ("q", "qpid", false, 
+      "use AMQP protocol");
    }
 
   public abstract int run() throws Exception; 
@@ -61,6 +64,11 @@ public abstract class Cmd
       {
       briefHelp (System.out);
       return 0;
+      }
+
+    if (cl.hasOption ("qpid"))
+      {
+      System.setProperty ("amqutil.driver", "qpid");
       }
 
     boolean time = false;
@@ -117,10 +125,34 @@ public abstract class Cmd
     }
 
   /**
+  Gets the Qpid Connection factory from either host/port or URL.
+  URL takes precedence.
+  */
+  ConnectionFactory getQpidFactory (String host, int port, 
+      String url)
+    {
+    ConnectionFactory factory = null; 
+    if (url != null && url.length() != 0)
+      {
+      factory = new org.apache.qpid.jms.JmsConnectionFactory (url);
+      if (!host.equals ("localhost") || port != 61616)
+        {
+        logger.warn ("Ignoring host/port arguments as a URL was specified");
+        }
+      }
+    else
+      {
+      factory = new org.apache.qpid.jms.JmsConnectionFactory
+          ("amqp://" + host + ":" + port);
+      }
+    return factory;
+    }
+
+  /**
   Gets the ActiveMQ Connection factory from either host/port or URL.
   URL takes precedence.
   */
-  ActiveMQConnectionFactory getFactory (String host, int port, 
+  ActiveMQConnectionFactory getActiveMQFactory (String host, int port, 
       String url)
     {
     ActiveMQConnectionFactory factory = null; 
@@ -138,6 +170,15 @@ public abstract class Cmd
           ("tcp://" + host + ":" + port);
       }
     return factory;
+    }
+
+  ConnectionFactory getFactory (String host, int port, 
+      String url)
+    {
+    if ("qpid".equals (System.getProperty("amqutil.driver")))
+      return getQpidFactory (host, port, url);
+    else
+      return getActiveMQFactory (host, port, url);
     }
 
   /** 

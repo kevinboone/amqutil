@@ -115,7 +115,7 @@ public class CmdProduce extends Cmd
     if (nonSwitchArgs.length > 0)
       n = Integer.parseInt (nonSwitchArgs[0]);
 
-    ActiveMQConnectionFactory factory = getFactory (host, port, url); 
+    ConnectionFactory factory = getFactory (host, port, url); 
 
     Connection connection = factory.createConnection(user, pass);
     Session session = connection.createSession
@@ -135,7 +135,6 @@ public class CmdProduce extends Cmd
 
     javax.jms.Message message = JMSUtil.makeMessage 
       (session, file, length, type);
-
 
     int oldpercent = 0;
     for (int i = 0; i < n; i++)

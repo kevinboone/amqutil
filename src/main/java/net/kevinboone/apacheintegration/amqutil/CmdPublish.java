@@ -102,7 +102,7 @@ public class CmdPublish extends Cmd
     if (batchSize != 0) batch = true; 
 
 
-    ActiveMQConnectionFactory factory = getFactory (host, port, url); 
+    ConnectionFactory factory = getFactory (host, port, url); 
 
     Connection connection = factory.createConnection(user, pass);
     Session session = connection.createSession
