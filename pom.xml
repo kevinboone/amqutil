@@ -4,7 +4,7 @@
   <groupId>net.kevinboone.apacheintegration.amqutil</groupId>
   <artifactId>amqutil</artifactId>
   <packaging>jar</packaging>
-  <version>0.1.1</version>
+  <version>0.1.2</version>
   <name>amqutil</name>
   <url>http://maven.apache.org</url>
   <dependencies>

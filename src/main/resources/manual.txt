@@ -3,7 +3,7 @@
 
 amqutil
 
-Version 0.1.1
+Version 0.1.2
 
 A simple test/benchmark utility for Apache Active MQ.
 

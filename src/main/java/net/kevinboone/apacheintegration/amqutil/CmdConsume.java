@@ -41,6 +41,7 @@ public class CmdConsume extends Cmd
     String properties = "";
     String selector = null;
     boolean showpercent = false;
+    boolean clientAck = false;
     String format = "short";
 
     String file = ""; // No default -- if not given, don't read/write file
@@ -51,10 +52,14 @@ public class CmdConsume extends Cmd
     int sleep = 0;
     int linger = 0;
     int batchSize = 0; 
+    int delay = 0; 
 
     String[] nonSwitchArgs = cl.getArgs();
     if (nonSwitchArgs.length > 0)
       n = Integer.parseInt (nonSwitchArgs[0]);
+
+    String _delay = cl.getOptionValue ("delay");
+    if (_delay != null) delay = Integer.parseInt (_delay);
 
     String _selector = cl.getOptionValue ("selector");
     if (_selector != null) selector = _selector;
@@ -95,6 +100,9 @@ public class CmdConsume extends Cmd
     if (cl.hasOption ("percent"))
       showpercent = true;
     
+    if (cl.hasOption ("client-ack"))
+      clientAck = true;
+    
     // For convenience, set a flag if we are batch processing
     boolean batch = false;
     if (batchSize != 0) batch = true; 
@@ -104,8 +112,17 @@ public class CmdConsume extends Cmd
     Connection connection = factory.createConnection(user, pass);
     connection.start();
 
-    Session session = connection.createSession
-        (batch, Session.AUTO_ACKNOWLEDGE);
+    Session session;
+    if (clientAck)
+      {
+      session = connection.createSession
+          (batch, Session.CLIENT_ACKNOWLEDGE);
+      }
+    else
+      {
+      session = connection.createSession
+          (batch, Session.AUTO_ACKNOWLEDGE);
+      }
 
     Queue queue = session.createQueue(destination);
 
@@ -115,16 +132,28 @@ public class CmdConsume extends Cmd
     else
       {
       consumer = session.createConsumer(queue, selector);
-      //System.out.println ("Selector is " + selector);
       }
 
     int oldpercent = 0;
     for (int i = 0; i < n; i++)
         {
         javax.jms.Message message = consumer.receive();
+	if (delay != 0)
+	  {
+	  try
+	    {
+            Thread.sleep (delay * 1000);
+	    }
+	  catch (Exception e)
+	    {
+	    }
+	  }
 
         if (linger != 0)
           Thread.sleep (linger);
+
+        if (clientAck)
+          message.acknowledge();
 
         if (batch)
           if ((i + 1) % batchSize == 0) session.commit();
@@ -157,6 +186,10 @@ public class CmdConsume extends Cmd
     options.addOption ("b", "batch", true, "set batch size");
     options.addOption (null, "format", true, 
       "display format: none|short|long|text");
+    options.addOption (null, "delay", true, 
+      "delay (seconds) after receiving each message");
+    options.addOption (null, "client-ack", false, 
+      "use client acknowledgment");
     options.addOption ("d", "destination", true, 
       "destination (queue or topic) name");
     options.addOption ("i", "file", true, 
