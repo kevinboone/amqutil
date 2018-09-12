@@ -65,7 +65,7 @@ public static void outputMessage (String format, Message message, String file)
           {
           System.out.println (message);
           }
-  if (format.equals ("text"))
+  if (format.equals ("text") || format.equals ("textonly"))
           {
           if (message instanceof TextMessage)
             System.out.println (((TextMessage)message).getText());

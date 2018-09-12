@@ -118,7 +118,7 @@ public class CmdShow extends Cmd
     {
     super.setupOptions();
     options.addOption (null, "format", true, 
-      "display format: none|short|long|text");
+      "display format: none|short|long|text|textonly");
     options.addOption ("d", "destination", true, 
       "destination (queue or topic) name");
     options.addOption (null, "host", true, "set server hostname");

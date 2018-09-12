@@ -317,11 +317,11 @@ is ignored. This option reads and writes using the platform's default
 character encoding (usually UTF-8 on Linux systems), even though this
 may not be the encoding format used within the JMS broker itself.
 
---format {none|short|long|text} Format for messages that are consumed
-with consume, subscribe or show. none is useful for benchmarking, because
-console output is often slower than messaging operations. short displays
-only the message ID and type; long displays all headers; text displays
-all headers and also the message body, if it is text.
+--format {none|short|long|text|textonly} Format for messages that are 
+displayed with consume, subscribe or show. none is useful for 
+benchmarking, because console output is often slower than messaging 
+operations. short displays only the message ID and type; long displays all 
+headers; text displays all headers and also the message body, if it is text.
 
 --host {hostname} The hostname or IP of the broker; defaults to localhost.
 

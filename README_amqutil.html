@@ -4,16 +4,20 @@
 
 <h1>amqutil</h1>
 
-Version 0.1.2<p/>
+Version 0.1.3<p/>
 
-A simple test/benchmark utility for Apache Active MQ.
+A simple test/benchmark utility for Apache message brokers.
 
 <h2>What is this?</h2>
 
 <code>amqutil</code> is a simple Java command-line utility for testing
-and exercising ActiveMQ destinations. It works with the open-source
-Apache ActiveMQ, and with Red Hat JBoss Fuse and JBoss A-MQ.
-It can put messages onto queues or
+and exercising Apache ActiveMQ and Artemis destinations. It works with the 
+open-source
+Apache projects, and also with Red Hat productized equivalents. Since
+adding support for Apache Qpid (in version 0.1.2), amqutil can also work
+with any message broker that supports AMQP 1.x.
+<p/>
+<code>amqutil</code>  can put messages onto queues or
 topics,
 consume from queues, set message header properties, 
 subscribe to topics, list queue contents, 
@@ -21,17 +25,17 @@ and dump individual messages in various formats.
 Messages can be read from and written to text files, or just generated
 internally by the utility. <code>amqutil</code> supports transacted
 batches, durable subscriptions, inter-message delays, and persistent
-and non-persistent production.
+and non-persistent production. It supports various acknowledgement modes.
 <p/>
 <code>amqutil</code> is intended to extend the test client functionality
 provided by the <code>mq-client.jar</code> utility that is
-supplied with JBoss A-MQ. Its command-line is similar (but not identical),
+supplied with ActiveMQ. Its command-line is similar (but not identical),
 but <code>amqutil</code> provides a number of features that
 <code>mq-client.jar</code> does not, particularly around queue and
 broker browsing, and message formatting.
 <p/>
 <code>amqutil</code> is supplied as a Java JAR file that embeds the ActiveMQ
-client runtime, so installation consists of downloading one JAR file
+and Qpid client runtimes, so installation consists of downloading one JAR file
 and copying it to any convenient directory.
 
 <h2>Sample command lines</h2>
@@ -100,6 +104,9 @@ amqutil subscribe --destination testtopic --durable my-client
 
 amqutil count --destination testtopic 
   Count the messages on the specified destinatioN 
+
+amqutil help subscribe
+  Get detailed usage for the subscribe command
 </pre>
 
 
@@ -117,7 +124,7 @@ java -jar /path/to/amqutil.jar {options}
 <h2>Building</h2>
 
 You will need to build <code>amqutil</code> if, for example, you want to
-change the version of the A-MQ runtime support which it bundles.
+change the version of the ActiveMQ runtime support that it bundles.
 <code>amqutil</code> is a Maven project. To build it, obtain and
 unpack the source code bundle, and then 
 
@@ -152,10 +159,10 @@ $ amqutil {options}
 </pre>
 
 Note that Maven will automatically download all the dependencies needed to
-build <code>amqutil</code> -- about 10Mb of them. This might take some
+build <code>amqutil</code> -- about 20Mb of them. This might take some
 time on the first build.
 <p/>
-<code>amqutil</code> is configured to use version 5.9.0 of the ActiveMQ
+<code>amqutil</code> is configured to use version 5.11.0 of the ActiveMQ
 client library. This can be changed my modifying the dependency in
 <code>pom.xml</code>.
 
@@ -489,20 +496,45 @@ amqutil --properties JMSXGroupID=something --produce ...
 <h2>Limitations</h2>
 
 <code>amqutil</code> is really only useful for
-sending and receiving text messages; JMS does support other formats, but
+sending and receiving text messages; JMS does support other formats, of
+course, but
 their contents are typically only meaningful to specific the applications
-the use them.
+the use them. However, the utility can also work with bytes messages --
+and these are usually quicker to generate when they need to be large.
 <p/>
 The utility was developed and tested using Sun/Oracle JDK 1.7. Although it
 uses no specific Java 7 language features or APIs, there are
 many dependent libraries and drivers, and these may not work with earlier
 Java versions. 
 <p/>
+Apache Artemis supports the OpenWire protocol that was developed for ActiveMQ,
+so the same client runtime (from ActiveMQ) can be used for both brokers.
+Howeve, ActiveMQ-specific features of OpenWire, such as the ability to
+list destinations on the broker, may not be supported by Artemis. 
+The same limitation applies to the AMQP protocol: not every command
+provided by <code>amqutil</code> will work with an AMQP-based broker.
+<p/>
 At present, <code>amqutil</code> is Enlish-language only.
 
 <h2>Revision history</h2>
 
 <table cellpadding="5" cellspacing="5">
+<tr>
+<td valign="top">
+0.1.3,&nbsp;September&nbsp;2018
+</td>
+<td valign="top">
+Added "textonly" format
+</td>
+</tr>
+<tr>
+<td valign="top">
+0.1.2,&nbsp;January&nbsp;2018
+</td>
+<td valign="top">
+Preliminary AMQP support using Apache Qpid
+</td>
+</tr>
 <tr>
 <td valign="top">
 0.1.0,&nbsp;March&nbsp;2015
@@ -531,6 +563,6 @@ in the hope that it will be useful. However, there is no warranty of any kind.
 <h2>Download</h2>
 
 <a href="amqutil.tar.gz">Source code bundle (Maven project)</a><br/>
-<a href="amqutil-0.1.2.jar">Precompiled JAR (including A-MQ runtime components)</a>
+<a href="amqutil-0.1.3.jar">Precompiled JAR (including A-MQ runtime components)</a>
 
 

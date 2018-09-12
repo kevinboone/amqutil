@@ -189,7 +189,7 @@ public class CmdSubscribe extends Cmd
     options.addOption (null, "durable", true, 
       "enable durable subscription with specified client ID");
     options.addOption (null, "format", true, 
-      "display format: none|short|long|text");
+      "display format: none|short|long|text|textonly");
     options.addOption (null, "selector", true, 
       "message selector expression");
     }

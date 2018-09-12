@@ -185,7 +185,7 @@ public class CmdConsume extends Cmd
     super.setupOptions();
     options.addOption ("b", "batch", true, "set batch size");
     options.addOption (null, "format", true, 
-      "display format: none|short|long|text");
+      "display format: none|short|long|text|textonly");
     options.addOption (null, "delay", true, 
       "delay (seconds) after receiving each message");
     options.addOption (null, "client-ack", false, 
