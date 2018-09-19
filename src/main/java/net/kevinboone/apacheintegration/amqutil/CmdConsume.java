@@ -173,6 +173,9 @@ public class CmdConsume extends Cmd
         }
     
     if (batch) session.commit();
+ 
+    if (consumer != null) consumer.close();
+    if (session != null) session.close();
 
     connection.close();
 
