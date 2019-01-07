@@ -7,6 +7,13 @@
   <version>0.1.3</version>
   <name>amqutil</name>
   <url>http://maven.apache.org</url>
+  <repositories>
+      <repository>
+          <id>redhat-ga</id>
+          <name>Redhat General availability repository</name>
+          <url>https://maven.repository.redhat.com/ga</url>
+      </repository>
+  </repositories>
   <dependencies>
     <dependency>
       <groupId>org.apache.activemq</groupId>
