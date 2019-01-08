@@ -16,7 +16,7 @@
     <dependency>
       <groupId>org.apache.qpid</groupId>
       <artifactId>qpid-jms-client</artifactId>
-      <version>0.31.0.redhat-2</version>
+      <version>0.40.0</version>
     </dependency>
     <dependency>
       <groupId>commons-cli</groupId>
