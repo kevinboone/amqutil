@@ -213,6 +213,19 @@ Displays the number of messages currently waiting on the specified
 destination.
 
 
+echo
+
+  
+   amqutil echo {--destination queue}
+
+Listens on the specified destination, and forwards each received message to
+the destination specified in the JMSReplyTo header. This command runs
+indefinitely. Its purpose is for troubleshooting applications that
+use request-reply messaging over JMS; amqutil can act as a "dummy destination"
+for a system that expects a reply. The --sleep switch can be used to
+simulate a delay in the response.
+
+
 help
 
 

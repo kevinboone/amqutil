@@ -33,6 +33,7 @@ static List<Cmd> listCmds()
   //  'help' output nicer
   ArrayList list = new ArrayList<Cmd>();
   list.add (new CmdBrowse());
+  list.add (new CmdEcho());
   list.add (new CmdCommands());
   list.add (new CmdConsume());
   list.add (new CmdCount());
