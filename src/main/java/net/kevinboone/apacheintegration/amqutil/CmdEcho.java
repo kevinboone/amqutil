@@ -109,39 +109,6 @@ public class CmdEcho extends Cmd
         logger.warn ("Message has no reply-to address");
 	}
       }
-
-    /*
-    MessageProducer producer = session.createProducer (queue);
-
-    int oldpercent = 0;
-    for (int i = 0; i < n; i++)
-        {
-        javax.jms.Message outMessage = JMSUtil.makeMessage 
-          (session, file, length, type);
-        outMessage.setJMSCorrelationID (correlationID);
-        JMSUtil.setProperties (logger, outMessage, properties);
-        producer.send (outMessage);
-  
-        javax.jms.Message message = consumer.receive();
-
-        if (sleep != 0)
-          Thread.sleep (sleep);
-
-        JMSUtil.outputMessage (format, message, file);
-
-        if (showpercent)
-          {
-          int percent = i * 100 / n;
-          if (percent != oldpercent)
-            System.out.println ("" + percent + "%");
-          oldpercent = percent;
-          }
-        }
-    
-    connection.close();
-
-    */
-    //return 0;
     }
 
   @Override
