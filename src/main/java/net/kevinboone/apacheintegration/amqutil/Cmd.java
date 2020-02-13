@@ -46,6 +46,8 @@ public abstract class Cmd
       "set log level -- error, info, etc");
    options.addOption ("q", "qpid", false, 
       "use AMQP protocol");
+   options.addOption ("a", "artemis", false, 
+      "use Artemis protocol");
    }
 
   public abstract int run() throws Exception; 
@@ -69,6 +71,11 @@ public abstract class Cmd
     if (cl.hasOption ("qpid"))
       {
       System.setProperty ("amqutil.driver", "qpid");
+      }
+
+    if (cl.hasOption ("artemis"))
+      {
+      System.setProperty ("amqutil.driver", "artemis");
       }
 
     boolean time = false;
@@ -104,6 +111,11 @@ public abstract class Cmd
     catch (Exception e)
       {
       throw new ArgParseException (e);
+      }
+    if (cl.hasOption ("qpid") && cl.hasOption ("artemis"))
+      {
+      throw new ArgParseException 
+        ("--qpid and --artemis cannot be used together"); 
       }
     }
 
@@ -172,11 +184,39 @@ public abstract class Cmd
     return factory;
     }
 
+  /**
+  Gets the Artemis Connection factory from either host/port or URL.
+  URL takes precedence.
+  */
+  org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory
+         getArtemisConnectionFactory (String host, int port, String url)
+    {
+    org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory
+       factory = null; 
+    if (url != null && url.length() != 0)
+      {
+      factory = 
+         new org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory (url);
+      if (!host.equals ("localhost") || port != 61616)
+        {
+        logger.warn ("Ignoring host/port arguments as a URL was specified");
+        }
+      }
+    else
+      {
+      factory = 
+        new org.apache.activemq.artemis.jms.client.ActiveMQConnectionFactory ("tcp://" + host + ":" + port);
+      }
+    return factory;
+    }
+
   ConnectionFactory getFactory (String host, int port, 
       String url)
     {
     if ("qpid".equals (System.getProperty("amqutil.driver")))
       return getQpidFactory (host, port, url);
+    else if ("artemis".equals (System.getProperty("amqutil.driver")))
+      return getArtemisConnectionFactory (host, port, url);
     else
       return getActiveMQFactory (host, port, url);
     }

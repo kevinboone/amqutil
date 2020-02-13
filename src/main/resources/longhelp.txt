@@ -1,9 +1,20 @@
+amqutil produce 
+  Send one default message (text) of default size (500) to the default
+  destination (__test_destination) to the default broker host (localhost) on
+  the default port (61616), using the default protocol (OpenWire)
+
+amqutil produce --qpid
+  As above, but using AMQP protocol
+
+amqutil produce --artemis
+  As above, but using Artemis protocol
+
 amqutil --host mybroker --port 6161 --destination testqueue --browse
   List messages on destination testqueue, on broker mybroker:6161
   Note that --url can be used instead of --host and --port
 
 amqutil --user fred --password secret --destination testqueue --browse
-  List messages on destination testqueue, on default broker localhost:6161,
+  Browse messages on destination testqueue, on default broker localhost:6161,
   using specific connection credentials
 
 amqutil --list

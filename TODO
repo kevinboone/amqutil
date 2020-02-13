@@ -1,4 +1,3 @@
-- Sleep after each batch
 - Support for non-text message types (this requires changes to both production
   and consumption)
 - Output formatting needs to be tidied up

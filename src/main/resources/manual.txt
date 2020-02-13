@@ -1,45 +1,40 @@
 
 
-
 amqutil
 
-Version 0.1.2
-
-A simple test/benchmark utility for Apache Active MQ.
-
+Version 0.1.4 A simple test/benchmark utility for Apache message brokers.
 
 What is this?
 
 amqutil is a simple Java command-line utility for testing and exercising
-ActiveMQ destinations. It works with the open-source Apache ActiveMQ,
-and with Red Hat JBoss Fuse and JBoss A-MQ. It can put messages onto
+Apache (and other) JMS message brokers. It works with the Apache ActiveMQ
+and Artemis brokers, and also with Red Hat productized equivalents, A-MQ
+6 and AMQ 7. Since adding support for Apache Qpid (in version 0.1.2),
+amqutil can also work with any message broker or router that supports
+AMQP 1.x, like qdrouterd. For Artemis-based brokers, amqutil can use
+the OpenWire or native Artemis wire protocols. The native Artemis
+protocol can be used to exercise the message broker built into recent
+versions of Wildfly (and JBoss EAP).  amqutil can put messages onto
 queues or topics, consume from queues, set message header properties,
 subscribe to topics, list queue contents, and dump individual messages
 in various formats. Messages can be read from and written to text files,
 or just generated internally by the utility. amqutil supports transacted
-batches, durable subscriptions, inter- message delays, and persistent
-and non-persistent production.
-
-amqutil is intended to extend the test client functionality provided
-by the mq- client.jar utility that is supplied with JBoss A-MQ. Its
-command-line is similar (but not identical), but amqutil provides a
-number of features that mq- client.jar does not, particularly around
-queue and broker browsing, and message formatting.
-
-As of version 0.1.1, amqutil can use the AMQP protocol via Apache
-QPID, rather than ActiveMQ OpenWire. This feature is enabled for
-all commands using the --qpid switch.
-
-amqutil is supplied as a Java JAR file that embeds the ActiveMQ client
-runtime, so installation consists of downloading one JAR file and copying
-it to any convenient directory.
-
+batches, durable subscriptions, inter-message delays, and persistent and
+non-persistent production. It supports various acknowledgement modes.
+amqutil was originally intended to extend the test client functionality
+provided by the mq-client.jar utility that was supplied with ActiveMQ,
+and so its command-line is similar (but not identical) to that utility's
+command line.  However, amqutil now supports many brokers, and provides
+a number of features that mq-client.jar never did, particularly around
+queue and broker browsing, and message formatting.  amqutil is supplied
+as a Java JAR file that embeds the ActiveMQ, Qpid, and Artemis client
+runtimes, so installation consists of building the application using
+Maven and copying the output JAR file to any convenient directory.
 
 Sample command lines
 
 amqutil is supplied as a Java JAR file (see the Downloads section),
 and should be invoked like this:
-
 
   java -jar /path/to/amqutil.jar [command] {options}
 
@@ -47,7 +42,8 @@ However, throughout this document the command amqutil is used as an
 abbreviation for this longer command line. Of course, it should be
 possible to create a script or batch file that allows amqutil to be
 invoked this way (and a sample is included in the source code bundle).
-
+Please note that the default wire protocol is OpenWire. You can change
+this using the --qpid or --artemis options.
 
   amqutil browse --host mybroker --port 6161 --destination testqueue
     List messages on destination testqueue, on broker mybroker:6161 Note
@@ -102,6 +98,9 @@ invoked this way (and a sample is included in the source code bundle).
   amqutil count --destination testtopic
     Count the messages on the specified destinatioN
 
+  amqutil help subscribe
+    Get detailed usage for the subscribe command
+
 
 Installing and running amqutil
 
@@ -109,21 +108,16 @@ You will need the compiled binary JAR file (see the Downloads section
 below) and a recent Java JVM (Java 7 or later.) To run the utility,
 install the JAR in any convenient directory, and then:
 
-
   java -jar /path/to/amqutil.jar {options}
 
 
 Building
 
-You will need to build amqutil if, for example, you want to change the
-version of the A-MQ runtime support which it bundles. amqutil is a Maven
-project. To build it, obtain and unpack the source code bundle, and then
-
+To build amqutil, obtain and unpack the source code bundle, and then
 
   mvn compile assembly:single
 
 or
-
 
   mvn package
 
@@ -131,30 +125,25 @@ This will create a JAR file in the target directory, which contains the
 amqutil code and all the necessary ActiveMQ client support. To run the
 utility, no other dependencies should be necessary; just use java -jar:
 
-
   java -jar target/amqutil-0.0.1-jar-with-dependencies.jar {options}
 
 For Linux users, a script install_linux.sh is provided that will copy
 the compiled JAR to /usr/share/amqutil and create an executable script
 /usr/bin/ amqutil to run it. Thereafter, you should be able to run simply:
 
-
   $ amqutil {options}
 
 Note that Maven will automatically download all the dependencies needed
-to build amqutil -- about 10Mb of them. This might take some time on
-the first build.
-
-amqutil is configured to use version 5.9.0 of the ActiveMQ client
-library. This can be changed my modifying the dependency in pom.xml.
-
-The latest version of the source can be obtained from github.
-
+to build amqutil -- about 20Mb of them. This might take some time
+on the first build.  amqutil is configured to use specific versions
+of the various client libraries it supports. These can be changed by
+modifying the versions in pom.xml: the values to be changd should be
+self-explanatory.  The latest version of the source can be obtained
+from github.
 
 Basic usage
 
 All amqutil invocations takes the following form:
-
 
   amqutil [command] {options}
 
@@ -162,16 +151,13 @@ The command is mandatory, and specifies the mode of operation. Further
 options depend on the command. In all cases, a brief description of the
 available options can be obtained thus:
 
-
   amqutil [command] --help
 
 To find out how to get more general information, just run
 
-
   amqutil help
 
 The commands (modes of operation) available to amqutil are a follows.
-
 
 browse
 
@@ -182,14 +168,12 @@ Display a list of messages on the destination whose name is given by
 the -- destination option. To see individual message contents, use show,
 passing the index of the message from the output of browse.
 
-
 commands
 
 
   amqutil commands
 
 Show a list of available commands.
-
 
 consume
 
@@ -203,7 +187,6 @@ the --format option; to write consumed text messages to a text file,
 using --file. If asked to consume more messages than are waiting on the
 destination, amqutil will block until new messages are available.
 
-
 count
 
 
@@ -212,27 +195,12 @@ count
 Displays the number of messages currently waiting on the specified
 destination.
 
-
-echo
-
-  
-   amqutil echo {--destination queue}
-
-Listens on the specified destination, and forwards each received message to
-the destination specified in the JMSReplyTo header. This command runs
-indefinitely. Its purpose is for troubleshooting applications that
-use request-reply messaging over JMS; amqutil can act as a "dummy destination"
-for a system that expects a reply. The --sleep switch can be used to
-simulate a delay in the response.
-
-
 help
 
 
   amqutil help
 
 Display a summary of command-line options.
-
 
 list
 
@@ -241,7 +209,6 @@ list
 
 List the destinations on the message broker.
 
-
 manual
 
 
@@ -249,7 +216,6 @@ manual
 
 Dump the whole manual (this file) to standard output in plain text format,
 formatted for 80 character width.
-
 
 produce
 
@@ -261,7 +227,6 @@ by the -- destination option. By default, one message is produced. To
 pproduce messages from a text file, use --file; otherwise a message of
 --length characters is generated internally.
 
-
 publish
 
 
@@ -271,7 +236,6 @@ Publish number messages to the topic destination whose name is given
 by the -- destination option. By default, one message is published. To
 publish messages from a text file, use --file; otherwise a message of
 --length characters is generated internally.
-
 
 show
 
@@ -286,7 +250,6 @@ the message that will be consumed next. If the message is a text message,
 its contents will be displayed. Note that it isn't an error to use this
 option with a topic, but no messages will ever be shown.
 
-
 subscribe
 
 
@@ -297,7 +260,6 @@ Subscribe to the topic destination whose name is given by the
 published to the topic.  If no number is given, wait for one message. The
 message read may be displayed, according to the --format option.
 
-
 version
 
 
@@ -305,88 +267,60 @@ version
 
 Show program version.
 
-
 Command-line options
 
-Not all command-line options are relevant to a specific command,
-although -- host, --port, --url, --user, and --password are generally
-applicable. To see which switches are applicable to a specific command,
-use amqutil [command] -- help.
-
---batch {size} Produce or consume messages in transacted batches of
-the specified size. Use -- batch 1 to use a transacted session without
-batching.
-
--d, --destination {destination_name} Specifies the queue or topic name for
-most other operations. If no name is given, the default is "__test_queue".
-
---durable {client-ID} Used in conjunction with amqutil subscribe, makes
-subscriptions durable with the specified client ID.
-
---file {filename} When publishing or producing messages, read the
-(text) message body from the specified file, rather than generating it
-internally. The whole file is read or written, and any --length option
-is ignored. This option reads and writes using the platform's default
-character encoding (usually UTF-8 on Linux systems), even though this
-may not be the encoding format used within the JMS broker itself.
-
---format {none|short|long|text|textonly} Format for messages that are 
-displayed with consume, subscribe or show. none is useful for 
-benchmarking, because console output is often slower than messaging 
-operations. short displays only the message ID and type; long displays all 
-headers; text displays all headers and also the message body, if it is text.
-
---host {hostname} The hostname or IP of the broker; defaults to localhost.
-
---jmstype {string} Set the value of the JMSType header.
-
+Not all command-line options are relevant to a specific command, although
+-- host, --port, --url, --qpid, --artemis, --user, and --password
+are generally applicable. To see which switches are applicable to a
+specific command, use amqutil [command] --help.  a,--artemis Use the
+native Artemis wire protocol --batch {size} Produce or consume messages
+in transacted batches of the specified size. Use -- batch 1 to use a
+transacted session without batching.  -d, --destination {destination_name}
+Specifies the queue or topic name for most other operations. If no name
+is given, the default is "__test_queue".  --durable {client-ID} Used
+in conjunction with amqutil subscribe, makes subscriptions durable with
+the specified client ID.  --file {filename} When publishing or producing
+messages, read the (text) message body from the specified file, rather
+than generating it internally. The whole file is read or written, and
+any --length option is ignored. This option reads and writes using the
+platform's default character encoding (usually UTF-8 on Linux systems),
+even though this may not be the encoding format used within the JMS
+broker itself.  --format {none|short|long|text} Format for messages
+that are consumed with consume, subscribe or show. none is useful for
+benchmarking, because console output is often slower than messaging
+operations. short displays only the message ID and type; long displays
+all headers; text displays all headers and also the message body, if it
+is text.  --host {hostname} The hostname or IP of the broker; defaults
+to localhost.  --jmstype {string} Set the value of the JMSType header.
 --length {number} When generating messages internally, use the specified
-number of characters.  Note that the number of bytes actually stored
-will depend on the character encoding used by the JVM and/or the JMS
-broker, and will typically be larger (rarely smaller) than the given
-number of characters.
-
---loglevel {error|warn|info|debug} Sets the logging level, both of this
-utility and the ActiveMQ client. In practice, although all these levels
-are defined, the only ones that the ActiveMQ client uses are 'error'
-and 'debug.' The default is 'error,' which means silent operation in
-normal circumstances.
-
---linger {msec} In batch mode (see --batch), delay for the specified
-time between receiving the batch, and acknowledging it. The batch size
-can be usefully be 1. This switch simulates an 'abnormal' condition,
-where the consumer takes a substantial time to acknowledge a message.
-
---nonpersistent Enable non-persistent delivery, when used with produce
-or publish.
-
--p. --password {password} Specifies the password for authentication
-against the AMQ broker. Default 'admin'.
-
---percent Prints percentage completion as an operation is performed;
-this can be useful when dealing with huge numbers of messages.
-
---port {number} Broker's TCP/IP port number; default 61616
-
---properties {name=value[,name=value]...} Sets arbitrary string properties
-to the message header before sending.  Properties are specified as
-name1=value1,name2=value2....
-
---sleep {msec} Sleep (wait) for the specified number of milliseconds
-after dispatching or consuming each message. See also --linger.
-
---selector {expression} When consuming messages from a queue, apply the
-specified selector expression
-
---time Show the time in milliseconds taken to complete whatever operation
-was specified.
-
---ttl {msec} When producing a message to a queue, set the expiration
-time to the specified time.
-
--u, --user {username} Username for authentication on the broker. Default
-'admin'.
-
+number of characters.  Note that the number of bytes actually stored will
+depend on the character encoding used by the JVM and/or the JMS broker,
+and will typically be larger (rarely smaller) than the given number of
+characters.  --loglevel {error|warn|info|debug} Sets the logging level,
+both of this utility and the ActiveMQ client. In practice, although all
+these levels are defined, the only ones that the ActiveMQ client uses
+are 'error' and 'debug.' The default is 'error,' which means silent
+operation in normal circumstances.  --linger {msec} In batch mode (see
+--batch), delay for the specified time between receiving the batch,
+and acknowledging it. The batch size can be usefully be 1. This switch
+simulates an 'abnormal' condition, where the consumer takes a substantial
+time to acknowledge a message.  --nonpersistent Enable non-persistent
+delivery, when used with produce or publish.  -p. --password
+{password} Specifies the password for authentication against the AMQ
+broker. Default 'admin'.  --percent Prints percentage completion as
+an operation is performed; this can be useful when dealing with huge
+numbers of messages.  --port {number} Broker's TCP/IP port number;
+default 61616 --properties {name=value[,name=value]...} Sets arbitrary
+string properties to the message header before sending.  Properties are
+specified as name1=value1,name2=value2....  -q,--qpid Use the Apache
+Qpid JMS client to support the AMQP 1.0 protocol.  --sleep {msec} Sleep
+(wait) for the specified number of milliseconds after dispatching or
+consuming each message. See also --linger.  --selector {expression}
+When consuming messages from a queue, apply the specified selector
+expression --time Show the time in milliseconds taken to complete
+whatever operation was specified.  --ttl {msec} When producing a message
+to a queue, set the expiration time to the specified time.  -u, --user
+{username} Username for authentication on the broker. Default 'admin'.
 --url {broker_url} Use a URL for connection to the broker, rather than a
 simple host/port combination. This will be necessary if you want to work
 with multiple brokers in a failover group. An example might be --url
@@ -394,50 +328,35 @@ failover:\(tcp://broker1: 61616,tcp://broker2:61616\). Note that the
 parentheses have to be escaped here to protect them from the shell. If
 --url is specified, then --host and --port are ignored.
 
-
 Notes
 
 When listing queue contents with browse, the first entry shown is the head
 of the queue, that is, the message that would next be consumed. When
 displaying messages without consuming them using show, the numeric
 argument specifies the position in the queue, with zero being the head.
-
 browse, show, and count all rely on the JMS queue browsing API. ActiveMQ
-can be configured such such case, amqutil will not have access to all
-the messages on a destination.
-
-When producing a message to a destination, if no message file (--file)
-is provided, then a string of 500 arbitrary characters will be produced,
-or of length set by the --length switch.
-
+can be configured such such case, amqutil will not have access to all the
+messages on a destination.  When producing a message to a destination,
+if no message file (--file) is provided, then a string of 500 arbitrary
+characters will be produced, or of length set by the --length switch.
 If a file is specified when consuming messages, then messages will be
 appended to that file, provided they are text messages. Any non-text
-messages are silently ignored
-
-When listing queue contents with --browse, no guarantee can be given
-that the queue contents will not change before the next operation.
-
-When producing a message from a text file, the file is read in the
-platform's default character encoding.
-
-It is not actually an error to use the --browse option on a topic, but
-no messages will ever be shown -- that is a consequence of the way that
-publish/ subscribe messaging works.
-
-When the --consume option is used, and it blocks because there are
-insufficient messages to consume, then the only way to stop the program
-is to kill it (e.g., ctrl+C). If the --batch mode is used, and the
-session is therefore transacted, any messages consumed will be returned
-to the destination. This is not a bug although it can be confusing --
-transacted sessions are designed to work that way.
-
-Message delivery is persistent by default. To test non-persistent
-delivery, use the --nonpersistent switch.
-
-ActiveMQ supports multi-destination production and consumption. To
-use this feature with amqutil, separate the multiple destinations with
-commas. For example: --destination d1,d2,d3.
-
+messages are silently ignored When listing queue contents with --browse,
+no guarantee can be given that the queue contents will not change before
+the next operation.  When producing a message from a text file, the
+file is read in the platform's default character encoding.  It is not
+actually an error to use the --browse option on a topic, but no messages
+will ever be shown -- that is a consequence of the way that publish/
+subscribe messaging works.  When the --consume option is used, and it
+blocks because there are insufficient messages to consume, then the only
+way to stop the program is to kill it (e.g., ctrl+C). If the --batch mode
+is used, and the session is therefore transacted, any messages consumed
+will be returned to the destination. This is not a bug although it can be
+confusing -- transacted sessions are designed to work that way.  Message
+delivery is persistent by default. To test non-persistent delivery,
+use the --nonpersistent switch.  ActiveMQ supports multi-destination
+production and consumption. To use this feature with amqutil, separate the
+multiple destinations with commas. For example: --destination d1,d2,d3.
 amqutil can monitor broker operation via advisory_topics. For example,
 to monitor connections being opened and closed in real time:
 
@@ -445,52 +364,48 @@ to monitor connections being opened and closed in real time:
 
 However, most advisory topics are not enabled by default, and some
 administrators are wary of enabling them, because of the additional
-network and memory load they might create.
-
-The --properties switch can be used to exercise some specific ActiveMQ
-behavior. For example, setting the JMSXGroupID header should ensure
-that a single consumer gets all the messages, regardless of the number
-of consumers attached.
+network and memory load they might create.  The --properties switch
+can be used to exercise some specific ActiveMQ behavior. For example,
+setting the JMSXGroupID header should ensure that a single consumer gets
+all the messages, regardless of the number of consumers attached.
 
   amqutil --properties JMSXGroupID=something --produce ...
 
 
-
 Limitations
 
-amqutil is really only useful for sending and receiving text messages;
-JMS does support other formats, but their contents are typically only
-meaningful to specific the applications the use them.
-
-The utility was developed and tested using Sun/Oracle JDK 1.7. Although
-it uses no specific Java 7 language features or APIs, there are many
-dependent libraries and drivers, and these may not work with earlier
-Java versions.
-
-At present, amqutil is Enlish-language only.
-
+amqutil is really only useful for sending and receiving text messages; JMS
+does support other formats, of course, but their contents are typically
+only meaningful to specific the applications the use them. However,
+the utility can also work with bytes messages -- and these are usually
+quicker to generate when they need to be large.  The utility was developed
+and tested using Sun/Oracle JDK 1.7. Although it uses no specific Java
+7 language features or APIs, there are many dependent libraries and
+drivers, and these may not work with earlier Java versions.  Apache
+Artemis supports the OpenWire protocol that was developed for ActiveMQ,
+so the same client runtime (from ActiveMQ) can be used for both brokers.
+Howeve, ActiveMQ-specific features of OpenWire, such as the ability to
+list destinations on the broker, may not be supported by Artemis. The
+same limitation applies to the AMQP protocol: not every command provided
+by amqutil will work with an AMQP-based broker.  At present, amqutil is
+Enlish-language only.
 
 Revision history
 
-0.1.1           June 2018 Initial Qpid AMQP support
 
-0.1.0           March 2015 Re-written so that command-line arguments are
-                specified differently for each sub-command, reducing the 
-                chance of the user providing arguments that have no effect.
-
-0.0.1           First functional release
-
+0.1.4, February 2020  Added Artemis support. Fixed broken manual
+command.  0.1.3, September 2018 Added "textonly" format 0.1.2, January
+2018   Preliminary AMQP support using Apache Qpid 0.1.0, March 2015
+Re-written so that command-line arguments are specified
+                      differently for each sub-command, reducing the
+                      chance of the user providing arguments that have
+                      no effect.
+0.0.1                 First functional release
 
 
 Author
 
-amqutil is mainted by Kevin Boone (kevin at railwayterrace dot com). It is
-distributed under the terms of the GNU Public License, version 3.0, in the
-hope that it will be useful. However, there is no warranty of any kind.
-
-
-Download
-
-Source_code_bundle_(Maven_project)
-Precompiled_JAR_(including_A-MQ_runtime_components)
-
+amqutil is mainted by Kevin Boone (kevin at railwayterrace dot com). It
+is distributed under the terms of the GNU Public License, version :.0,
+in the hope that it will be useful. However, there is no warranty of
+any kind. Please report bugs through GitHub.

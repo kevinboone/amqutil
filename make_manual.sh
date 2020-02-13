@@ -1,5 +1,5 @@
 #!/bin/bash
 
-html2text -style pretty -nobs README_amqutil.html |grep -v corner|fmt > src/main/resources/manual.txt
+html2text -nobs -style pretty README.md |grep -v corner|fmt > src/main/resources/manual.txt
 
  
