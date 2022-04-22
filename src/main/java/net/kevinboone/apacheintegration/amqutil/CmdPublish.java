@@ -45,6 +45,7 @@ public class CmdPublish extends Cmd
     int batchSize = 0; 
     int length = 500; // Length of message generated internally
     boolean nonPersistent = false;
+    boolean numbered = false;
     String properties = "";
     String type = "text";
 
@@ -95,12 +96,14 @@ public class CmdPublish extends Cmd
     if (cl.hasOption ("nonpersistent"))
       nonPersistent = true;
 
+    if (cl.hasOption ("numbered"))
+      numbered = true;
+
     String _properties = cl.getOptionValue ("properties");
     if (_properties != null) properties = _properties;
 
     boolean batch = false;
     if (batchSize != 0) batch = true; 
-
 
     ConnectionFactory factory = getFactory (host, port, url); 
 
@@ -116,11 +119,14 @@ public class CmdPublish extends Cmd
         producer.setDeliveryMode (DeliveryMode.NON_PERSISTENT);
 
     javax.jms.Message message = JMSUtil.makeMessage (session, file, 
-      length, type);
+        length, type);
 
     int oldpercent = 0;
     for (int i = 0; i < n; i++)
         {
+        if (numbered)
+           message = session.createTextMessage ("" + i); 
+
 	JMSUtil.setProperties (logger, message, properties);
         producer.send(message);
 
@@ -170,6 +176,8 @@ public class CmdPublish extends Cmd
       "length of internally-generated message, in characters (default 500)");
     options.addOption (null, "nonpersistent", false,  
       "enable non-persistent delivery");
+    options.addOption (null, "numbered", false,  
+      "send numbered TextMessage as the payload");
     options.addOption (null, "properties", true, "add header properties");
     }
 
