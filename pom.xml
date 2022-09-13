@@ -4,7 +4,7 @@
   <groupId>net.kevinboone.apacheintegration.amqutil</groupId>
   <artifactId>amqutil</artifactId>
   <packaging>jar</packaging>
-  <version>0.1.4</version>
+  <version>0.1.5</version>
   <name>amqutil</name>
   <properties>
     <activemq.version>5.11.0</activemq.version>
@@ -17,6 +17,11 @@
   <dependencies>
     <dependency>
       <groupId>org.apache.activemq</groupId>
+      <artifactId>artemis-jms-client-all</artifactId>
+      <version>${artemis.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.activemq</groupId>
       <!-- activemq-all gets a load of other stuff we need, like
            log4j. However, ideally it would be better if that were
 	   specified separately -->
@@ -27,11 +32,6 @@
       <groupId>org.apache.qpid</groupId>
       <artifactId>qpid-jms-client</artifactId>
       <version>${qpid.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.activemq</groupId>
-      <artifactId>artemis-jms-client-all</artifactId>
-      <version>${artemis.version}</version>
     </dependency>
     <dependency>
       <groupId>commons-cli</groupId>

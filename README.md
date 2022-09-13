@@ -1,6 +1,6 @@
 <h1>amqutil</h1>
 
-Version 0.1.4<p/>
+Version 0.1.5<p/>
 
 A simple test/benchmark utility for Apache message brokers.
 
@@ -314,6 +314,15 @@ Subscribe to the topic destination whose name is given by the
 If no <code>number</code> is given, wait for one message.
 The message read may be displayed, according to 
 the <code>--format</code> option. 
+<p></p>
+The <code>--durable</code> switch creates a durable subscription with
+the specific client ID on the connection. The subscription name is 
+"amqutil", which cannot be changed. The <code>--shared</code> switch
+creates a shared subscription, as defined in the JMS 2.0 specification.
+This can be combined with <code>--durable</code> if required. Note that
+shared subscription support is only available for wire protocols that
+are compatible with JMS 2.0; in other cases an exception will be
+thrown.
 
 <h4>version</h4>
 <pre class="codeblock">
@@ -537,6 +546,14 @@ At present, <code>amqutil</code> is Enlish-language only.
 <h2>Revision history</h2>
 
 <table cellpadding="5" cellspacing="5">
+<tr>
+<td valign="top">
+0.1.5,&nbsp;September&nbsp;2022
+</td>
+<td valign="top">
+Added JMS 2.0 shared subscription support 
+</td>
+</tr>
 <tr>
 <td valign="top">
 0.1.4,&nbsp;February&nbsp;2020

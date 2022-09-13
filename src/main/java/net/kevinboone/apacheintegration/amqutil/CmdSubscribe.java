@@ -44,6 +44,7 @@ public class CmdSubscribe extends Cmd
     String file = ""; // No default -- if not given, don't read/write file
     int sleep = 0;
     boolean showpercent = false;
+    boolean shared = false;
     int batchSize = 0; 
     int length = 500; // Length of message generated internally
     String properties = "";
@@ -86,6 +87,9 @@ public class CmdSubscribe extends Cmd
     if (cl.hasOption ("percent"))
       showpercent = true;
 
+    if (cl.hasOption ("shared"))
+      shared = true;
+
     String _batchSize = cl.getOptionValue ("batch");
     if (_batchSize != null) batchSize  = Integer.parseInt (_batchSize);
 
@@ -122,20 +126,44 @@ public class CmdSubscribe extends Cmd
     Topic topic = session.createTopic(destination);
 
     MessageConsumer consumer = null; 
+
     if (durable != null)
         {
         if (selector == null)
-          consumer = session.createDurableSubscriber (topic, "amqutil");
+          {
+          if (shared)
+            consumer = session.createSharedDurableConsumer
+              (topic, "amqutil_shared");
+          else
+            consumer = session.createDurableSubscriber (topic, "amqutil");
+          }
         else
-          consumer = session.createDurableSubscriber 
-            (topic, "amqutil", selector, false);
+          {
+          if (shared)
+            consumer = session.createSharedDurableConsumer
+              (topic, "amqutil_shared", selector);
+          else
+            consumer = session.createDurableSubscriber 
+              (topic, "amqutil", selector, false);
+          }
         }
     else
         {
         if (selector == null)
-          consumer = session.createConsumer(topic);
+          {
+          if (shared)
+            consumer = session.createSharedConsumer (topic, "amqutil_shared");
+          else
+            consumer = session.createConsumer(topic);
+          }
         else
-          consumer = session.createConsumer(topic, selector);
+          {
+          if (shared)
+            consumer = session.createSharedConsumer (topic, 
+              "amqutil_shared", selector);
+          else
+            consumer = session.createConsumer(topic, selector);
+          }
         }
 
     int oldpercent = 0;
@@ -182,6 +210,8 @@ public class CmdSubscribe extends Cmd
       "sleep for the specified number of milliseconds between each message");
     options.addOption (null, "percent", false, 
       "show progress percentage");
+    options.addOption (null, "shared", false, 
+      "use JMS2 shared subscription");
     options.addOption ("b", "batch", true, "set batch size");
     options.addOption (null, "length", true, 
       "length of internally-generated message, in characters (default 500)");

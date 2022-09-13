@@ -28,7 +28,7 @@ public class CmdVersion extends Cmd
   @Override 
   public int run() throws Exception
     {
-    System.out.println ("Version 0.1.4, copyright (c)2015-8 Kevin Boone.");
+    System.out.println ("Version 0.1.5, copyright (c)2015-2022 Kevin Boone.");
     System.out.println 
        ("Distributed under the terms of the GNU Public Licence, v3.0");
     return 0;
